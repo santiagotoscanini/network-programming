@@ -19,17 +19,29 @@ namespace NetworkCommunication
 
         public byte[] Read(int length)
         {
-            int offset = 0;
+            var offset = 0;
             var data = new byte[length];
             while (offset < length)
             {
                 var read = _networkStream.Read(data, offset, length - offset);
                 if (read == 0)
+                {
                     throw new Exception("Connection lost");
+                }
                 offset += read;
             }
 
             return data;
+        }
+
+        public void Disconnect()
+        {
+            _networkStream.Close();
+        }
+
+        public void ReceiveFile()
+        {
+            
         }
     }
 }

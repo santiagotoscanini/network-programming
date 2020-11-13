@@ -22,7 +22,8 @@ namespace Server
                     _userService); // cambiar para implementar una inyeccion de dependencia y un singleton
 
         private static string _commandsToUser = @"'get users' -> to get the register users
-'post logout <<your email>>' -> to close your session and close the connection";
+'post logout <<your email>>' -> to close your session and close the connection
+'put image <<email>> <<path>' -> to save a new image";
 
         private static string _commandsToServer = @"'get connectedUsers' -> to get the connected users
 'put user <<email>> <<password>>' -> to create a new user
@@ -76,6 +77,15 @@ namespace Server
                             return Logout(email);
                     }
                     break;
+                case "put":
+                    element = words[1];
+                    switch (element)
+                    {
+                        case "image":
+                            var email = words[2];
+                            return ReceiveFile(email);
+                    }
+                    break;
             }
 
             return "Bad request";
@@ -105,14 +115,10 @@ namespace Server
                     switch (element)
                     {
                         case "user":
-                            var email = words[2]; //deberiamos poner un catch para estas cosas, hacer como en delee
+                            var email = words[2]; //deberiamos poner un catch para estas cosas, hacer como en delete
                             var password = words[3];
                             _userService.CreateUser(email, password);
                             return "Created";
-                        case "image":
-                            var userEmail = words[2];
-                            var path = words[3];
-                            return ReceiveFile();
                     }
                     break;
                 case "delete":
@@ -224,35 +230,26 @@ namespace Server
         {
             while (true)
             {
-                byte[] dataLength = communication.Read(ProtocolConstants.FixedDataSize);
-                int dataSize = BitConverter.ToInt32(dataLength, 0);
-                byte[] data = communication.Read(dataSize);
-                var msg = Encoding.UTF8.GetString(data);
-                Write(communication, ExecuteUserRequest(msg));
+                try
+                {
+                    byte[] dataLength = communication.Read(ProtocolConstants.FixedDataSize);
+                    int dataSize = BitConverter.ToInt32(dataLength, 0);
+                    byte[] data = communication.Read(dataSize);
+                    var msg = Encoding.UTF8.GetString(data);
+                    Write(communication, ExecuteUserRequest(msg));
+                }
+                catch (System.IO.IOException e)
+                {
+                    return;
+                }
             }
         }
-        //
-        // private static string GetVerb(string message)
-        // {
-        //     return Regex.Replace(message.Split()[0], @"[^0-9a-zA-Z\ ]+", "");
-        // }
-        //
-        // private static string GetElement(string message)
-        // {
-        //     return Regex.Replace(message.Split()[1], @"[^0-9a-zA-Z\ ]+", "");
-        // }
-        //
-        // private static string GetParam(string message, int paramNumber)
-        // {
-        //     return Regex.Replace(message.Split()[paramNumber + 1], @"[^0-9a-zA-Z\ ]+", "");
-        // }
 
         private static string Logout(string email)
         {
             try
             {
                 _sessionService.LogoutUser(email);
-                _clients.GetValueOrDefault(email).Disconnect();
                 _clients.Remove(email); //deberiamos cerrar el hilo en este momento?
                 return "You session was closed and you are disconnected";
             }
@@ -275,9 +272,11 @@ namespace Server
             }
         }
 
-        private static string ReceiveFile()
+        private static string ReceiveFile(string email)
         {
-            return "Image Saved";
+            _clients.GetValueOrDefault(email).ReceiveFile();
+            return "Successfully saved";
         }
+
     }
 }

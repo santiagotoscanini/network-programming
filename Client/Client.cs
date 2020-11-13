@@ -9,6 +9,8 @@ namespace Client
 {
     class Client
     {
+        private static bool _isConnected = false;
+        
         static void Main(string[] args)
         {
             Console.WriteLine("Starting client...");
@@ -19,25 +21,23 @@ namespace Client
             client.Connect(serverIpEndPoint);
             NetworkStream stream = client.GetStream();
             var communication = new Communication(stream);
+            _isConnected = true;
             new Thread(() => Read(communication)).Start();
             Write(communication);
         }
 
         static void Write(Communication communication)
         {
-            while (true)
+            while (_isConnected)
             {
                 var msg = Console.ReadLine();
-                var data = Encoding.UTF8.GetBytes(msg);
-                byte[] dataLength = BitConverter.GetBytes(data.Length);
-                communication.Write(dataLength);
-                communication.Write(data);
+                ExecuteUserRequest(msg,  communication);
             }
         }
 
         static void Read(Communication communication)
         {
-            while (true)
+            while (_isConnected)
             {
                 byte[] dataLength = communication.Read(ProtocolConstants.FixedDataSize);
                 int dataSize = BitConverter.ToInt32(dataLength, 0);
@@ -45,6 +45,50 @@ namespace Client
                 var msg = Encoding.UTF8.GetString(data);
                 Console.WriteLine(msg);
             }
+        }
+        
+        private static void ExecuteUserRequest(string message, Communication communication)
+        {
+            var words = message.Split(" ");
+            var verb = words[0];
+            string element;
+            switch (verb)
+            {
+                case "put":
+                    element = words[1];
+                    switch (element)
+                    {
+                        case "image":
+                            var path = words[3];
+                            WriteToServer(communication, message);
+                            communication.SendFile(path);
+                            Console.WriteLine("Successfully sent file");
+                            break;
+                    }
+                    break;
+                case "post":
+                    element = words[1];
+                    switch (element)
+                    {
+                        case "logout":
+                            WriteToServer(communication, message);
+                            _isConnected = false;
+                            break;
+                    }
+                    break;
+                default:
+                    WriteToServer(communication, message);
+                    break;
+            }
+            
+        }
+
+        private static void WriteToServer(Communication communication, string msg)
+        {
+            var data = Encoding.UTF8.GetBytes(msg);
+            byte[] dataLength = BitConverter.GetBytes(data.Length);
+            communication.Write(dataLength);
+            communication.Write(data);
         }
     }
 }

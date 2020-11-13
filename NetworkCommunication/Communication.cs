@@ -41,7 +41,14 @@ namespace NetworkCommunication
 
         public void ReceiveFile()
         {
-            
+            FileCommunicationHandler fileCommunicationHandler = new FileCommunicationHandler(_networkStream);
+            fileCommunicationHandler.ReceiveFile();
+        }
+        
+        public void SendFile(string path)
+        {
+            FileCommunicationHandler fileCommunicationHandler = new FileCommunicationHandler(_networkStream);
+            fileCommunicationHandler.SendFile(path);
         }
     }
 }

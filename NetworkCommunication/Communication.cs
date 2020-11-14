@@ -39,10 +39,10 @@ namespace NetworkCommunication
             _networkStream.Close();
         }
 
-        public void ReceiveFile()
+        public string ReceiveFile()
         {
             FileCommunicationHandler fileCommunicationHandler = new FileCommunicationHandler(_networkStream);
-            fileCommunicationHandler.ReceiveFile();
+            return fileCommunicationHandler.ReceiveFile();
         }
         
         public void SendFile(string path)

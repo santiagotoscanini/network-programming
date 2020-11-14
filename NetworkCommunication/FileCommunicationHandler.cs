@@ -63,7 +63,7 @@ namespace NetworkCommunication
             }
         }
 
-        public void ReceiveFile()
+        public string ReceiveFile()
         {
             int fileNameSize = _conversionHandler.ConvertBytesToInt(
                 _networkStreamHandler.Read(ProtocolConstants.FixedNameSize));
@@ -71,6 +71,7 @@ namespace NetworkCommunication
             long fileSize = _conversionHandler.ConvertBytesToLong(
                 _networkStreamHandler.Read(ProtocolConstants.FixedFileSize));
             ReceiveFileWithStreams(fileSize, fileName);
+            return fileName;
         }
         
         private void ReceiveFileWithStreams(long fileSize, string fileName)

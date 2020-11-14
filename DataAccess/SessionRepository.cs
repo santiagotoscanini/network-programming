@@ -1,22 +1,27 @@
 ﻿using System.Collections.Generic;
+using Domain;
 
 namespace DataAccess
 {
     public class SessionRepository
     {
-        private readonly List<string> _loggedUsers = new List<string>();
+        private readonly List<LoggedUser> _loggedUsers = new List<LoggedUser>();
 
         public void AddLoggedUser(string userEmail)
         {
-            _loggedUsers.Add(userEmail);
+            var loggedUser = new LoggedUser
+            {
+                Email = userEmail
+            };
+            _loggedUsers.Add(loggedUser);
         }
 
-        public void DeleteLoggedUser(string userEmail)
+        public void DeleteLoggedUser(LoggedUser user)
         {
-            _loggedUsers.Remove(userEmail);
+            _loggedUsers.Remove(user);
         }
 
-        public List<string> GetLoggedUsers()
+        public List<LoggedUser> GetLoggedUsers()
         {
             return _loggedUsers;
         }

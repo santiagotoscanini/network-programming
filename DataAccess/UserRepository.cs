@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Domain;
 
 namespace DataAccess
@@ -21,6 +22,32 @@ namespace DataAccess
         public void Delete(User user)
         {
             _users.Remove(user);
+        }
+
+        public void AddUserImage(User user, Image image)
+        {
+            user.Images.Add(image);
+        }
+
+        public List<Image> GetUserImages(User user)
+        {
+            return user.Images;
+        }
+
+        public void AddImageComment(Image image, Comment comment)
+        {
+            image.Comments.Add(comment);
+        }
+
+        public List<Comment> GetImageComments(Image image)
+        {
+            return image.Comments;
+        }
+
+        public void UpdateUser(User user)
+        {
+            var original = _users.Find(u => u.Equals(user));
+            original.Password = user.Password;
         }
     }
 }

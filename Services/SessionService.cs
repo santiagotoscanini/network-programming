@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using DataAccess;
+using Domain;
 
 namespace Services
 {
@@ -22,24 +23,24 @@ namespace Services
 
         public void LogoutUser(string email)
         {
-            var isUserLoged = SessionRepository.GetLoggedUsers().Contains(email);
-            if (isUserLoged)
+            var loggedUser = SessionRepository.GetLoggedUsers().Find(l => l.Email.Equals(email));
+            if (loggedUser != null)
             {
-                SessionRepository.DeleteLoggedUser(email);
+                SessionRepository.DeleteLoggedUser(loggedUser);
             }
         }
 
         public string GetLoggedUsers()
         {
-            return ConvertStringListToString(SessionRepository.GetLoggedUsers());
+            return ConvertLoggedUserListToString(SessionRepository.GetLoggedUsers());
         }
 
-        private string ConvertStringListToString(List<string> stringList)
+        private string ConvertLoggedUserListToString(List<LoggedUser> loggedUserList)
         {
             var list = "";
-            foreach (var value in stringList)
+            foreach (var value in loggedUserList)
             {
-                list = value + " ";
+                list += "|" + value.Email + " - " + value.ConnectionDate;
             }
 
             return list;

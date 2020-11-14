@@ -49,38 +49,51 @@ namespace Client
         
         private static void ExecuteUserRequest(string message, Communication communication)
         {
-            var words = message.Split(" ");
-            var verb = words[0];
-            string element;
-            switch (verb)
+            try
             {
-                case "put":
-                    element = words[1];
-                    switch (element)
-                    {
-                        case "image":
-                            var path = words[3];
-                            WriteToServer(communication, message);
-                            communication.SendFile(path);
-                            Console.WriteLine("Successfully sent file");
-                            break;
-                    }
-                    break;
-                case "post":
-                    element = words[1];
-                    switch (element)
-                    {
-                        case "logout":
-                            WriteToServer(communication, message);
-                            _isConnected = false;
-                            break;
-                    }
-                    break;
-                default:
-                    WriteToServer(communication, message);
-                    break;
+
+                var words = message.Split(" ");
+                var verb = words[0];
+                string element;
+                switch (verb)
+                {
+                    case "put":
+                        element = words[1];
+                        switch (element)
+                        {
+                            case "image":
+                                var path = words[3];
+                                WriteToServer(communication, message);
+                                communication.SendFile(path);
+                                Console.WriteLine("Successfully sent file");
+                                break;
+                            default:
+                                WriteToServer(communication, message);
+                                break;
+                        }
+                        break;
+                    case "post":
+                        element = words[1];
+                        switch (element)
+                        {
+                            case "logout":
+                                WriteToServer(communication, message);
+                                _isConnected = false;
+                                break;
+                            default:
+                                WriteToServer(communication, message);
+                                break;
+                        }
+                        break;
+                    default:
+                        WriteToServer(communication, message);
+                        break;
+                }
             }
-            
+            catch (System.IndexOutOfRangeException e)
+            {
+                Console.WriteLine("Bad Request");
+            }
         }
 
         private static void WriteToServer(Communication communication, string msg)

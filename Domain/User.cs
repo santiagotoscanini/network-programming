@@ -6,7 +6,7 @@ namespace Domain
     {
         public string Email { get; set; }
         public string Password { get; set; }
-        public IEnumerable<Image> Images { get; set; } = new List<Image>();
+        public List<Image> Images { get; set; } = new List<Image>();
         
         public override bool Equals(object obj)
         {

@@ -3,6 +3,6 @@
     public interface IFileCommunicationHandler
     {
         void SendFile(string path);
-        void ReceiveFile();
+        string ReceiveFile();
     }
 }

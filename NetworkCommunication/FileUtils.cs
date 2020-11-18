@@ -4,9 +4,9 @@ using NetworkCommunication.interfaces;
 
 namespace NetworkCommunication
 {
-    public class FileHandler : IFileHandler
+    public class FileUtils : IFileUtils
     {
-        private const string _imageNotExistMessage = "Image doesn't exist";
+        private const string ImageDontExistMessage = "Image doesn't exist";
         
         public bool FileExists(string path)
         {
@@ -20,7 +20,7 @@ namespace NetworkCommunication
                 return new FileInfo(path).Name;
             }
 
-            throw new Exception(_imageNotExistMessage);
+            throw new Exception(ImageDontExistMessage);
         }
 
         public long GetFileSize(string path)
@@ -30,7 +30,7 @@ namespace NetworkCommunication
                 return new FileInfo(path).Length;
             }
 
-            throw new Exception(_imageNotExistMessage);
+            throw new Exception(ImageDontExistMessage);
         }
 
         public byte[] ReadFile(string path)
@@ -40,20 +40,17 @@ namespace NetworkCommunication
                 return File.ReadAllBytes(path);
             }
 
-            throw new Exception(_imageNotExistMessage);
+            throw new Exception(ImageDontExistMessage);
         }
 
         public void WriteFile(string fileName, byte[] data)
         {
             if (FileExists(fileName))
             {
-                throw new Exception(_imageNotExistMessage);
-                
+                throw new Exception(ImageDontExistMessage);
             }
-            else
-            {
-                File.WriteAllBytes(fileName, data);
-            }
+
+            File.WriteAllBytes(fileName, data);
         }
     }
 }

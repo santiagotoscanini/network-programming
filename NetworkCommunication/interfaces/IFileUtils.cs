@@ -1,6 +1,6 @@
 ﻿namespace NetworkCommunication.interfaces
 {
-    public interface IFileHandler
+    public interface IFileUtils
     {
         bool FileExists(string path);
         string GetFileName(string path);

@@ -8,7 +8,7 @@ namespace Services
 {
     public class UserService
     {
-        private UserRepository _userRepository { get; }
+        private UserRepository UserRepository { get; }
 
         private const string InvalidUserDataMessage = "Invalid email or password";
         private const string UserAlreadyExistMessage = "Already exist user with that email";
@@ -16,14 +16,14 @@ namespace Services
 
         public UserService(UserRepository userRepository)
         {
-            _userRepository = userRepository;
+            UserRepository = userRepository;
         }
 
         internal void ValidateUser(string userEmail, string userPassword)
         {
             try
             {
-                _userRepository.GetUsers()
+                var first = UserRepository.GetUsers()
                     .First(u => u.Email.Equals(userEmail) && u.Password.Equals(userPassword));
             }
             catch (Exception e)
@@ -34,7 +34,7 @@ namespace Services
 
         public string GetUsers()
         {
-            return ConvertUserListToString(_userRepository.GetUsers());
+            return ConvertUserListToString(UserRepository.GetUsers());
         }
 
         private string ConvertUserListToString(IEnumerable<User> users)
@@ -52,7 +52,7 @@ namespace Services
                 Password = password,
             };
             VerifyUser(user);
-            _userRepository.AddUser(user);
+            UserRepository.AddUser(user);
         }
 
         private void VerifyUser(User user)
@@ -67,7 +67,7 @@ namespace Services
         public void DeleteUser(string email)
         {
             var user = GetUserByEmail(email);
-            _userRepository.Delete(user);
+            UserRepository.Delete(user);
         }
 
         public void AddImageComment(string commentText, string imageName, string userEmail, string userCommentEmail)
@@ -80,14 +80,14 @@ namespace Services
                 Text = commentText,
                 User = userComment,
             };
-            _userRepository.AddImageComment(image, comment);
+            UserRepository.AddImageComment(image, comment);
         }
 
         public string GetUserImages(string userEmail)
         {
             var user = GetUserByEmail(userEmail);
 
-            var images = _userRepository.GetUserImages(user);
+            var images = UserRepository.GetUserImages(user);
             return ConvertImageListToString(images);
         }
         
@@ -102,7 +102,7 @@ namespace Services
         {
             var user = GetUserByEmail(userEmail);
             var image = GetUserImageByName(imageName, user);
-            var comments = _userRepository.GetImageComments(image);
+            var comments = UserRepository.GetImageComments(image);
             return ConvertCommentListToString(comments);
         }
         
@@ -117,19 +117,19 @@ namespace Services
         {
             var image = new Image {Name = imageName};
             var user = GetUserByEmail(userEmail);
-            _userRepository.AddUserImage(user, image);
+            UserRepository.AddUserImage(user, image);
         }
 
         public void UpdateUserPassword(string email, string password)
         {
             var user = GetUserByEmail(email);
             user.Password = password;
-            _userRepository.UpdateUser(user);
+            UserRepository.UpdateUser(user);
         }
 
         private User GetUserByEmail(string userEmail)
         {
-            var user = _userRepository.GetUsers().Find(u => u.Email.Equals(userEmail));
+            var user = UserRepository.GetUsers().Find(u => u.Email.Equals(userEmail));
             if (user == null)
             {
                 throw new Exception(WrongEmailMessage);
@@ -140,7 +140,7 @@ namespace Services
 
         private Image GetUserImageByName(string imageName, User user)
         {
-            var image = _userRepository.GetUserImages(user).Find(i => i.Name.Equals(imageName));
+            var image = UserRepository.GetUserImages(user).Find(i => i.Name.Equals(imageName));
             if (image == null)
             {
                 throw new Exception("Doesn't exist: "+ image.Name + " image");

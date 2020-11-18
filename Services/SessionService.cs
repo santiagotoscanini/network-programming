@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using DataAccess;
 using Domain;
 
@@ -35,15 +36,10 @@ namespace Services
             return ConvertLoggedUserListToString(SessionRepository.GetLoggedUsers());
         }
 
-        private string ConvertLoggedUserListToString(List<LoggedUser> loggedUserList)
+        private string ConvertLoggedUserListToString(IEnumerable<LoggedUser> loggedUserList)
         {
-            var list = "";
-            foreach (var value in loggedUserList)
-            {
-                list += "|" + value.Email + " - " + value.ConnectionDate;
-            }
-
-            return list;
+            return loggedUserList.Aggregate("",
+                (current, value) => current + ("|" + value.Email + " - " + value.ConnectionDate));
         }
     }
 }

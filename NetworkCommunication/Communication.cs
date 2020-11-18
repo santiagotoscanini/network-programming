@@ -12,6 +12,8 @@ namespace NetworkCommunication
             _networkStream = networkStream;
         }
 
+        
+        
         public void Write(byte[] data)
         {
             _networkStream.Write(data, 0, data.Length);
@@ -24,30 +26,22 @@ namespace NetworkCommunication
             while (offset < length)
             {
                 var read = _networkStream.Read(data, offset, length - offset);
-                if (read == 0)
-                {
-                    throw new Exception("Connection lost");
-                }
+                if (read == 0) throw new Exception("Connection lost");
                 offset += read;
             }
 
             return data;
         }
 
-        public void Disconnect()
-        {
-            _networkStream.Close();
-        }
-
         public string ReceiveFile()
         {
-            FileCommunicationHandler fileCommunicationHandler = new FileCommunicationHandler(_networkStream);
+            var fileCommunicationHandler = new FileCommunicationHandler(this);
             return fileCommunicationHandler.ReceiveFile();
         }
         
         public void SendFile(string path)
         {
-            FileCommunicationHandler fileCommunicationHandler = new FileCommunicationHandler(_networkStream);
+            var fileCommunicationHandler = new FileCommunicationHandler(this);
             fileCommunicationHandler.SendFile(path);
         }
     }

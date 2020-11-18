@@ -9,16 +9,18 @@ namespace Client
 {
     class Client
     {
-        private static bool _isConnected = false;
+        private static bool _isConnected;
         
         static void Main(string[] args)
         {
             Console.WriteLine("Starting client...");
             var clientIpEndPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 0);
-            var serverIpEndPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 6000);
             TcpClient client = new TcpClient(clientIpEndPoint);
+            
             Console.WriteLine("Attempting connection to server...");
+            var serverIpEndPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 6000);
             client.Connect(serverIpEndPoint);
+            
             NetworkStream stream = client.GetStream();
             var communication = new Communication(stream);
             _isConnected = true;
@@ -26,32 +28,31 @@ namespace Client
             Write(communication);
         }
 
-        static void Write(Communication communication)
-        {
-            while (_isConnected)
-            {
-                var msg = Console.ReadLine();
-                ExecuteUserRequest(msg,  communication);
-            }
-        }
-
-        static void Read(Communication communication)
+        private static void Read(Communication communication)
         {
             while (_isConnected)
             {
                 byte[] dataLength = communication.Read(ProtocolConstants.FixedDataSize);
-                int dataSize = BitConverter.ToInt32(dataLength, 0);
+                var dataSize = BitConverter.ToInt32(dataLength, 0);
                 byte[] data = communication.Read(dataSize);
                 var msg = Encoding.UTF8.GetString(data);
                 Console.WriteLine(msg);
             }
         }
-        
+
+        private static void Write(Communication communication)
+        {
+            while (_isConnected)
+            {
+                var msg = Console.ReadLine();
+                ExecuteUserRequest(msg, communication);
+            }
+        }
+
         private static void ExecuteUserRequest(string message, Communication communication)
         {
             try
             {
-
                 var words = message.Split(" ");
                 var verb = words[0];
                 string element;
@@ -90,7 +91,7 @@ namespace Client
                         break;
                 }
             }
-            catch (System.IndexOutOfRangeException e)
+            catch (IndexOutOfRangeException)
             {
                 Console.WriteLine("Bad Request");
             }
@@ -99,7 +100,7 @@ namespace Client
         private static void WriteToServer(Communication communication, string msg)
         {
             var data = Encoding.UTF8.GetBytes(msg);
-            byte[] dataLength = BitConverter.GetBytes(data.Length);
+            var dataLength = BitConverter.GetBytes(data.Length);
             communication.Write(dataLength);
             communication.Write(data);
         }

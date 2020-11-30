@@ -7,6 +7,7 @@ package repository;
 service Repo {
   rpc AddLoggedUser(AddLoggedUserRequest) returns (EmptyMessage);
   rpc GetLoggedUsers(EmptyMessage) returns (GetLoggedUsersResponse);
+  rpc DeleteLoggedUser(GetLoggedUser) returns (EmptyMessage);
 }
 
 message AddLoggedUserRequest {

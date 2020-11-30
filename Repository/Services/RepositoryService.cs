@@ -37,5 +37,12 @@ namespace Repository
             }
             return Task.FromResult(getLoggedUsersToReturn);
         }
+
+        public override Task<EmptyMessage> DeleteLoggedUser(GetLoggedUser request, ServerCallContext context)
+        {
+            var loggedUser = _sessionRepository.GetLoggedUsers().Find(u => u.Email.Equals(request.Email));
+            _sessionRepository.DeleteLoggedUser(loggedUser);
+            return Task.FromResult(new EmptyMessage {});
+        }
     }
 }

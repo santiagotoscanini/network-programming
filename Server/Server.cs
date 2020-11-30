@@ -305,7 +305,7 @@ namespace Server
         {
             try
             {
-                SessionService.LogoutUser(email);
+                SessionService.LogoutUserAsync(email);
                 Clients.Remove(email); //deberiamos cerrar el hilo en este momento?
                 return "You session was closed and you are disconnected";
             }

@@ -27,12 +27,18 @@ namespace Services
             _clientRepository.AddLoggedUserAsync(new AddLoggedUserRequest { UserEmail = userEmail });
         }
 
-        public void LogoutUser(string email)
+        public async Task LogoutUserAsync(string email)
         {
             var loggedUser = SessionRepository.GetLoggedUsers().Find(l => l.Email.Equals(email));
+            GetLoggedUsersResponse response = await _clientRepository.GetLoggedUsersAsync(new EmptyMessage());
+            var getLoggedUser = response.LoggedUsers.FirstOrDefault(u => u.Email.Equals(email));
             if (loggedUser != null)
             {
                 SessionRepository.DeleteLoggedUser(loggedUser);
+            }
+            if (getLoggedUser != null)
+            {
+                _clientRepository.DeleteLoggedUserAsync(getLoggedUser);
             }
         }
 

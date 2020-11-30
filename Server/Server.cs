@@ -4,11 +4,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using DataAccess;
-using Grpc.Net.Client;
 using NetworkCommunication;
-using Repository;
 using Services;
 
 namespace Server
@@ -55,11 +52,11 @@ namespace Server
             while (_isConnected)
             {
                 var request = Console.ReadLine();
-                Console.WriteLine(ExecuteServerRequest(request));
+                Console.WriteLine(ExecuteServerRequestAsync(request).Result);
             }
         }
 
-        private static string ExecuteServerRequest(string message)
+        private static async System.Threading.Tasks.Task<string> ExecuteServerRequestAsync(string message)
         {
             try
             {
@@ -79,7 +76,7 @@ namespace Server
                         switch (element)
                         {
                             case "connectedUsers":
-                                return SessionService.GetLoggedUsers();
+                                return await SessionService.GetLoggedUsersAsync();
                         }
 
                         break;

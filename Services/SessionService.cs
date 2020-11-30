@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using DataAccess;
 using Domain;
 using Grpc.Net.Client;
@@ -35,14 +36,21 @@ namespace Services
             }
         }
 
-        public string GetLoggedUsers()
+        public async Task<string> GetLoggedUsersAsync()
         {
-            return ConvertLoggedUserListToString(SessionRepository.GetLoggedUsers());
+            GetLoggedUsersResponse response = await _clientRepository.GetLoggedUsersAsync(new EmptyMessage());
+            return ConvertLoggedUserListToString(SessionRepository.GetLoggedUsers()) + ConvertGetLoggedUserListToString(response);
         }
 
         private string ConvertLoggedUserListToString(IEnumerable<LoggedUser> loggedUserList)
         {
             return loggedUserList.Aggregate("",
+                (current, value) => current + ("|" + value.Email + " - " + value.ConnectionDate));
+        }
+
+        private string ConvertGetLoggedUserListToString(GetLoggedUsersResponse loggedUserList)
+        {
+            return loggedUserList.LoggedUsers.ToList().Aggregate("",
                 (current, value) => current + ("|" + value.Email + " - " + value.ConnectionDate));
         }
     }

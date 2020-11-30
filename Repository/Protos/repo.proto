@@ -16,5 +16,10 @@ message AddLoggedUserRequest {
 message EmptyMessage {}
 
 message GetLoggedUsersResponse {
-	string loggedUsers = 2;
+	repeated GetLoggedUser loggedUsers = 2;
+}
+
+message GetLoggedUser{
+    string email = 3;
+	string connectionDate = 4;
 }

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Grpc.Core;
@@ -18,10 +17,25 @@ namespace Repository
             _sessionRepository = new SessionRepository();
         }
 
-        public override Task<AddLoggedUserResponse> AddLoggedUser(AddLoggedUserRequest request, ServerCallContext context)
+        public override Task<EmptyMessage> AddLoggedUser(AddLoggedUserRequest request, ServerCallContext context)
         {
             _sessionRepository.AddLoggedUser(request.UserEmail);
-            return Task.FromResult(new AddLoggedUserResponse {});
+            return Task.FromResult(new EmptyMessage {});
+        }
+
+        public override Task<GetLoggedUsersResponse> GetLoggedUsers(EmptyMessage request, ServerCallContext context)
+        {
+            var loggedUsers = _sessionRepository.GetLoggedUsers();
+            var getLoggedUsers = loggedUsers.Select(u => new GetLoggedUser { 
+                Email = u.Email,
+                ConnectionDate = u.ConnectionDate.ToString(),
+            });
+            var getLoggedUsersToReturn = new GetLoggedUsersResponse();
+            foreach (GetLoggedUser user in getLoggedUsers) 
+            {
+                getLoggedUsersToReturn.LoggedUsers.Add(user);
+            }
+            return Task.FromResult(getLoggedUsersToReturn);
         }
     }
 }

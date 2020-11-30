@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
-using Domain;
-using Grpc.Net.Client;
+﻿using Domain;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace DataAccess
+namespace Repository.Repositories
 {
     public class SessionRepository
     {

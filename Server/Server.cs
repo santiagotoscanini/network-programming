@@ -4,8 +4,11 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using DataAccess;
+using Grpc.Net.Client;
 using NetworkCommunication;
+using Repository;
 using Services;
 
 namespace Server
@@ -14,6 +17,7 @@ namespace Server
     {
         private static readonly Dictionary<string, Communication> Clients = new Dictionary<string, Communication>();
         private static readonly UserService UserService = new UserService(new UserRepository());
+        private static bool _isConnected = true;
 
         private static readonly SessionService SessionService = new SessionService(
             new SessionRepository(),
@@ -29,7 +33,9 @@ namespace Server
         private const string CommandsToServer = @"'get connectedUsers' -> to get the connected users
 'put user <<email>> <<password>>' -> to create a new user
 'delete user <<email>>' -> to delete a user
-'post user <<email>> <<new password>>' -> to change the user password";
+'post user <<email>> <<new password>>' -> to change the user password
+'bye' -> to shut down the server
+'hi' -> to say hi";
 
         static void Main(string[] args)
         {
@@ -45,7 +51,8 @@ namespace Server
         private static void StartListen()
         {
             Console.WriteLine("Server connected. Use the 'help' command to know what you can do.");
-            while (true)
+            _isConnected = true;
+            while (_isConnected)
             {
                 var request = Console.ReadLine();
                 Console.WriteLine(ExecuteServerRequest(request));
@@ -64,6 +71,9 @@ namespace Server
                 {
                     case "help":
                         return CommandsToServer;
+                    case "bye":
+                        _isConnected = false;
+                        return "Bye bye";
                     case "get":
                         element = words[1];
                         switch (element)
@@ -183,7 +193,7 @@ namespace Server
 
         private static void WaitingForClients(TcpListener server)
         {
-            while (true)
+            while (_isConnected)
             {
                 TcpClient client = server.AcceptTcpClient();
                 NetworkStream stream = client.GetStream();

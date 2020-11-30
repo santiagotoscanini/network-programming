@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option csharp_namespace = "Repository";
+
+package repository;
+
+service Repo {
+  rpc AddLoggedUser(AddLoggedUserRequest) returns (EmptyMessage);
+  rpc GetLoggedUsers(EmptyMessage) returns (GetLoggedUsersResponse);
+}
+
+message AddLoggedUserRequest {
+	string userEmail = 1;
+}
+
+message EmptyMessage {}
+
+message GetLoggedUsersResponse {
+	string loggedUsers = 2;
+}

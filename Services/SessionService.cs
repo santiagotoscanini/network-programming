@@ -2,6 +2,8 @@
 using System.Linq;
 using DataAccess;
 using Domain;
+using Grpc.Net.Client;
+using Repository;
 
 namespace Services
 {
@@ -9,6 +11,7 @@ namespace Services
     {
         private SessionRepository SessionRepository { get; }
         private UserService UserService { get; }
+        private Repo.RepoClient _clientRepository = new Repo.RepoClient(GrpcChannel.ForAddress("https://localhost:5001"));
 
         public SessionService(SessionRepository sessionRepository, UserService userService)
         {
@@ -20,6 +23,7 @@ namespace Services
         {
             UserService.ValidateUser(userEmail, userPassword);
             SessionRepository.AddLoggedUser(userEmail);
+            _clientRepository.AddLoggedUserAsync(new AddLoggedUserRequest { UserEmail = userEmail });
         }
 
         public void LogoutUser(string email)

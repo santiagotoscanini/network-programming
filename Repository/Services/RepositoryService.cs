@@ -1,20 +1,20 @@
-using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
-using Repository.Repositories;
+using Repository.RepositoriesInterfaces;
 
 namespace Repository
 {
     public class RepositoryService : Repo.RepoBase
     {
         private readonly ILogger<RepositoryService> _logger;
-        private readonly SessionRepository _sessionRepository;
-        public RepositoryService(ILogger<RepositoryService> logger)
+        private readonly ISessionRepository _sessionRepository;
+
+        public RepositoryService(ILogger<RepositoryService> logger, ISessionRepository sessionRepository)
         {
             _logger = logger;
-            _sessionRepository = new SessionRepository();
+            _sessionRepository = sessionRepository;
         }
 
         public override Task<EmptyMessage> AddLoggedUser(AddLoggedUserRequest request, ServerCallContext context)

@@ -5,21 +5,22 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Google.Protobuf" Version="3.9.1" />
-      <PackageReference Include="Grpc.Net.ClientFactory" Version="2.23.2" />
-      <PackageReference Include="Grpc.Tools" Version="2.23.0">
+      <PackageReference Include="Grpc.Tools" Version="2.27.0">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\DataAccess\DataAccess.csproj" />
+      <ProjectReference Include="..\Repository\Repository.csproj" />
     </ItemGroup>
 
     <ItemGroup>
       <Protobuf Include="..\Repository\Protos\repo.proto" GrpcServices="Client">
         <Link>Protos\repo.proto</Link>
+      </Protobuf>
+      <Protobuf Include="..\Repository\Protos\repoUser.proto" GrpcServices="Client">
+        <Link>Protos\repoUser.proto</Link>
       </Protobuf>
     </ItemGroup>
 </Project>

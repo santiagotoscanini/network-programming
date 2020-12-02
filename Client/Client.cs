@@ -34,8 +34,10 @@ namespace Client
             {
                 byte[] dataLength = communication.Read(ProtocolConstants.FixedDataSize);
                 var dataSize = BitConverter.ToInt32(dataLength, 0);
+
                 byte[] data = communication.Read(dataSize);
                 var msg = Encoding.UTF8.GetString(data);
+
                 Console.WriteLine(msg);
             }
         }
@@ -65,8 +67,7 @@ namespace Client
                             case "image":
                                 var path = words[3];
                                 WriteToServer(communication, message);
-                                communication.SendFile(path);
-                                Console.WriteLine("Successfully sent file");
+                                Console.WriteLine("> " + SendFile(communication, path));
                                 break;
                             default:
                                 WriteToServer(communication, message);
@@ -87,6 +88,7 @@ namespace Client
                         }
                         break;
                     default:
+                        // In this case falls the client connection, fetch images, etc.
                         WriteToServer(communication, message);
                         break;
                 }
@@ -103,6 +105,19 @@ namespace Client
             var dataLength = BitConverter.GetBytes(data.Length);
             communication.Write(dataLength);
             communication.Write(data);
+        }
+
+        private static string SendFile(Communication communication, string path)
+        {
+            try
+            {
+                communication.SendFile(path);
+                return "Successfully sent file";
+            }
+            catch (Exception e)
+            {
+                return e.Message;
+            }
         }
     }
 }

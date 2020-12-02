@@ -4,7 +4,6 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using DataAccess;
 using NetworkCommunication;
 using Services;
 
@@ -13,12 +12,15 @@ namespace Server
     class Server
     {
         private static readonly Dictionary<string, Communication> Clients = new Dictionary<string, Communication>();
-        private static readonly UserService UserService = new UserService(new UserRepository());
+        // TODO esto no va
+        private static readonly UserService UserService = new UserService();
         private static bool _isConnected = true;
 
-        private static readonly SessionService SessionService = new SessionService(
-            new SessionRepository(),
-            UserService);
+        private static readonly SessionService SessionService = new SessionService(UserService);
+
+        private const string InvalidUserDataMessage = "Invalid email or password";
+        private const string InvalidImageMessage = "Invalid image name";
+        private const string InvalidUserEmailMessage = "Invalid user email";
 
         private const string CommandsToUser = @"'get users' -> to get the register users
 'post logout <<your email>>' -> to close your session and close the connection
@@ -31,8 +33,7 @@ namespace Server
 'put user <<email>> <<password>>' -> to create a new user
 'delete user <<email>>' -> to delete a user
 'post user <<email>> <<new password>>' -> to change the user password
-'bye' -> to shut down the server
-'hi' -> to say hi";
+'bye' -> to shut down the server";
 
         static void Main(string[] args)
         {
@@ -87,8 +88,7 @@ namespace Server
                             case "user":
                                 var email = words[2];
                                 var password = words[3];
-                                UserService.CreateUser(email, password);
-                                return "Created";
+                                return CreateUser(email, password);
                         }
 
                         break;
@@ -140,7 +140,7 @@ namespace Server
                         switch (element)
                         {
                             case "users":
-                                return UserService.GetUsers();
+                                return UserService.GetUsersAsync().Result;
                             case "images":
                                 var email = words[2];
                                 return GetUserImages(email);
@@ -205,7 +205,7 @@ namespace Server
                 "Welcome, if you want to login in your account write: 'login' or if you want to register write: 'register'");
             string readInfo = ReadInfo(communication);
             switch (readInfo) 
-                // TODO: ver si estas llamadas recursivas no es mejor meterlas en un while porque un ser malvado puede llenar el stack
+            // TODO: arreglar esto
             {
                 case "login":
                     Login(communication);
@@ -227,17 +227,19 @@ namespace Server
         {
             Write(communication, "Write your email:");
             string userEmail = ReadInfo(communication);
+
             Write(communication, "Write your password:");
             string userPassword = ReadInfo(communication);
-            try
-            {
-                SessionService.LoginUser(userEmail, userPassword);
+            
+            var isCorrectUser = SessionService.LoginUser(userEmail, userPassword);
+            if (isCorrectUser) 
+            { 
                 Clients.Add(userEmail, communication);
             }
-            catch (Exception e)
-            {
-                Write(communication, e.Message);
-                return Login(communication); //hacer esto es legal?
+            else { 
+                Write(communication, InvalidUserDataMessage);
+                // TODO: Cambiar esto
+                return Login(communication);
             }
 
             return userEmail;
@@ -258,7 +260,8 @@ namespace Server
             catch (Exception e)
             {
                 Write(communication, e.Message);
-                return Register(communication); //hacer esto es legal?
+                // Cambiar esto
+                return Register(communication);
             }
 
             return userEmail;
@@ -301,12 +304,26 @@ namespace Server
             }
         }
 
+        private static string CreateUser(string email, string password)
+        {
+            try
+            {
+                UserService.CreateUser(email, password);
+                return "Created";
+            }
+            catch (Exception e)
+            {
+                return e.Message;
+            }
+        }
+
         private static string Logout(string email)
         {
             try
             {
                 SessionService.LogoutUserAsync(email);
-                Clients.Remove(email); //deberiamos cerrar el hilo en este momento?
+                Clients.Remove(email);
+                // TODO: cerrar el hilo de aca
                 return "You session was closed and you are disconnected";
             }
             catch (Exception e)
@@ -317,15 +334,14 @@ namespace Server
 
         private static string DeleteUser(string email)
         {
-            try
+            
+            var isDeleted = UserService.DeleteUser(email);
+            if (!isDeleted)
             {
-                UserService.DeleteUser(email);
-                return "User deleted";
+                return InvalidUserEmailMessage;
             }
-            catch (Exception e)
-            {
-                return e.Message;
-            }
+            return "User deleted";
+           
         }
 
         private static string ReceiveFile(string email)
@@ -333,7 +349,11 @@ namespace Server
             try
             {
                 var imageName = Clients.GetValueOrDefault(email)?.ReceiveFile();
-                UserService.AddUserImage(imageName, email);
+                var isSaved = UserService.AddUserImage(imageName, email);
+                if (!isSaved)
+                {
+                    return InvalidUserEmailMessage;
+                }
                 return "Successfully saved";
             }
             catch (Exception e)
@@ -347,8 +367,15 @@ namespace Server
         {
             try
             {
-                UserService.AddImageComment(commentText, imageName, userEmail, userCommentEmail);
-                return "Comment Saved";
+                var isCommentSaved = UserService.AddImageCommentAsync(commentText, imageName, userEmail, userCommentEmail).Result;
+                if (isCommentSaved)
+                {
+                    return "Comment Saved";
+                }
+                else
+                {
+                    return InvalidImageMessage;
+                }
             }
             catch (Exception e)
             {
@@ -358,22 +385,19 @@ namespace Server
 
         private static string UpdateUserPassword(string email, string password)
         {
-            try
+            var isSaved = UserService.UpdateUserPassword(email, password);
+            if (!isSaved)
             {
-                UserService.UpdateUserPassword(email, password);
-                return "Change saved";
+                return InvalidUserEmailMessage;
             }
-            catch (Exception e)
-            {
-                return e.Message;
-            }
+            return "Change saved";
         }
 
         private static string GetUserImages(string email)
         {
             try
             {
-                return UserService.GetUserImages(email);
+                return UserService.GetUserImagesAsync(email).Result;
             }
             catch (Exception e)
             {
@@ -385,7 +409,7 @@ namespace Server
         {
             try
             {
-                return UserService.GetImageComments(userEmail, imageName);
+                return UserService.GetImageCommentsAsync(userEmail, imageName).Result;
             }
             catch (Exception e)
             {

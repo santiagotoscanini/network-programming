@@ -1,12 +1,10 @@
 ﻿using Domain;
-using System;
+using Repository.RepositoriesInterfaces;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Repository.Repositories
 {
-    public class SessionRepository
+    public class SessionRepository : ISessionRepository
     {
         private readonly List<LoggedUser> _loggedUsers = new List<LoggedUser>();
 

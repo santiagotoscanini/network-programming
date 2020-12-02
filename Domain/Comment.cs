@@ -3,6 +3,6 @@
     public class Comment
     {
         public string Text { get; set; }
-        public User User { get; set; }
+        public string UserEmail { get; set; }
     }
 }

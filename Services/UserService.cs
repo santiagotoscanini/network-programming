@@ -1,40 +1,43 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using DataAccess;
 using Domain;
+using Grpc.Net.Client;
+using Repository;
 
 namespace Services
 {
     public class UserService
     {
-        private UserRepository UserRepository { get; }
+        private RepoUser.RepoUserClient _clientRepository = new RepoUser.RepoUserClient(GrpcChannel.ForAddress("https://localhost:5001"));
 
         private const string InvalidUserDataMessage = "Invalid email or password";
         private const string UserAlreadyExistMessage = "Already exist user with that email";
         private const string WrongEmailMessage = "Wrong Email";
 
-        public UserService(UserRepository userRepository)
+        public UserService() {}
+
+        internal async System.Threading.Tasks.Task<bool> ValidateUserAsync(string userEmail, string userPassword)
         {
-            UserRepository = userRepository;
+                var response = await _clientRepository.GetUsersAsync(new EmptyMessagee {});
+                return response.Users.Any(u => u.UserEmail.Equals(userEmail) && u.Password.Equals(userPassword));
         }
 
-        internal void ValidateUser(string userEmail, string userPassword)
+        public async System.Threading.Tasks.Task<string> GetUsersAsync()
         {
-            try
-            {
-                var first = UserRepository.GetUsers()
-                    .First(u => u.Email.Equals(userEmail) && u.Password.Equals(userPassword));
-            }
-            catch (Exception e)
-            {
-                throw new Exception(InvalidUserDataMessage);
-            }
+            var response = await _clientRepository.GetUsersAsync(new EmptyMessagee());
+            var convertFromResp = ConvertResponseToUser(response.Users);
+            return ConvertUserListToString(convertFromResp);
         }
 
-        public string GetUsers()
+        private ICollection<User> ConvertResponseToUser(ICollection<UserProto> usersProtos) 
         {
-            return ConvertUserListToString(UserRepository.GetUsers());
+            var users = usersProtos.Select(u => new User 
+            {
+                Email = u.UserEmail,
+                Password = u.Password,
+            });
+            return users.ToArray();
         }
 
         private string ConvertUserListToString(IEnumerable<User> users)
@@ -46,107 +49,153 @@ namespace Services
 
         public void CreateUser(string email, string password)
         {
-            var user = new User
+            var userRequest = new AddUserRequest
             {
-                Email = email,
+                UserEmail = email,
                 Password = password,
             };
-            VerifyUser(user);
-            UserRepository.AddUser(user);
+            VerifyUser(userRequest);
+            _clientRepository.AddUserAsync(userRequest);
         }
 
-        private void VerifyUser(User user)
+        private void VerifyUser(AddUserRequest user)
         {
-            var alreadyExist = GetUsers().Contains(user.Email);
+            var alreadyExist = GetUsersAsync().Result.Contains(user.UserEmail);
             if (alreadyExist)
             {
                 throw new Exception(UserAlreadyExistMessage);
             }
         }
 
-        public void DeleteUser(string email)
+        public bool DeleteUser(string email)
         {
-            var user = GetUserByEmail(email);
-            UserRepository.Delete(user);
-        }
-
-        public void AddImageComment(string commentText, string imageName, string userEmail, string userCommentEmail)
-        {
-            var user = GetUserByEmail(userEmail);
-            var userComment = GetUserByEmail(userCommentEmail);
-            var image = user.Images.Find(i => i.Name.Equals(imageName));
-            var comment = new Comment
+            var isValidUser = ValidateUserByEmailAsync(email).Result;
+            if (isValidUser) 
             {
-                Text = commentText,
-                User = userComment,
-            };
-            UserRepository.AddImageComment(image, comment);
+                var userRequest = new AddUserRequest
+                {
+                    UserEmail = email,
+                };
+                _clientRepository.DeleteUserAsync(userRequest);
+            }
+            return isValidUser;
         }
 
-        public string GetUserImages(string userEmail)
+        public async System.Threading.Tasks.Task<bool> AddImageCommentAsync(string commentText, string imageName, string userEmail, string userCommentEmail)
         {
-            var user = GetUserByEmail(userEmail);
+            var isValidUser = ValidateUserByEmailAsync(userEmail).Result;
+            var isValidUserComment = ValidateUserByEmailAsync(userCommentEmail).Result;
+            if (isValidUser && isValidUserComment) 
+            {
+                var imagesResponse = await _clientRepository.GetUserImagesAsync(new AddUserRequest { UserEmail = userEmail});
+                var isValidImage = ValidateImageByName(imageName, imagesResponse.Images);
+                if (isValidImage) 
+                {
+                    var comment = new CommentProto
+                    {
+                        Text = commentText,
+                        UserEmail = userCommentEmail,
+                    };
+                    var addImageCommentRequest = new AddImageCommentRequest
+                    {
+                        UserEmail = userEmail,
+                        ImageName = imageName,
+                        Comment = comment
+                    };
+                    _clientRepository.AddImageCommentAsync(addImageCommentRequest);
+                }
+                return isValidImage;
+            }
+            return isValidUser && isValidUserComment;
+        }
 
-            var images = UserRepository.GetUserImages(user);
-            return ConvertImageListToString(images);
+        public async System.Threading.Tasks.Task<string> GetUserImagesAsync(string userEmail)
+        {
+            var isValidUser = ValidateUserByEmailAsync(userEmail).Result;
+            if (isValidUser) 
+            {
+                var request = new AddUserRequest { UserEmail = userEmail };
+                var imagesResponse = await _clientRepository.GetUserImagesAsync(request);
+                return ConvertImageListToString(imagesResponse.Images);
+            }
+            return WrongEmailMessage;
         }
         
-        private string ConvertImageListToString(IEnumerable<Image> images)
+        private string ConvertImageListToString(IEnumerable<ImageProto> images)
         {
             var userImages = images.Select(i => i.Name);
 
             return userImages.Aggregate("", (current, image) => current + image + " ");
         }
         
-        public string GetImageComments(string userEmail, string imageName)
+        public async System.Threading.Tasks.Task<string> GetImageCommentsAsync(string userEmail, string imageName)
         {
-            var user = GetUserByEmail(userEmail);
-            var image = GetUserImageByName(imageName, user);
-            var comments = UserRepository.GetImageComments(image);
-            return ConvertCommentListToString(comments);
+            var isValidUser = ValidateUserByEmailAsync(userEmail).Result;
+            if (isValidUser) {
+                var imagesResponse = await _clientRepository.GetUserImagesAsync(new AddUserRequest { UserEmail = userEmail });
+                if (ValidateImageByName(imageName, imagesResponse.Images))
+                {
+                    var request = new AddUserImageRequest 
+                    { 
+                        Email = userEmail,
+                        ImageName = imageName,
+                    };
+                    var getImageCommentsResult = await _clientRepository.GetImageCommentsAsync(request);
+                    return ConvertCommentListToString(getImageCommentsResult.Comments);
+                }
+                return "Invalid image name";
+            }
+            return WrongEmailMessage;
         }
         
-        private string ConvertCommentListToString(IEnumerable<Comment> comments)
+        private string ConvertCommentListToString(IEnumerable<CommentProto> comments)
         {
-            var imageComments = comments.Select(c => c.Text + "    by    " + c.User.Email);
+            var imageComments = comments.Select(c => c.Text + "    by    " + c.UserEmail);
 
             return imageComments.Aggregate("", (current, comment) => current + comment + " ");
         }
         
-        public void AddUserImage(string imageName, string userEmail)
+        public bool AddUserImage(string imageName, string userEmail)
         {
-            var image = new Image {Name = imageName};
-            var user = GetUserByEmail(userEmail);
-            UserRepository.AddUserImage(user, image);
-        }
-
-        public void UpdateUserPassword(string email, string password)
-        {
-            var user = GetUserByEmail(email);
-            user.Password = password;
-            UserRepository.UpdateUser(user);
-        }
-
-        private User GetUserByEmail(string userEmail)
-        {
-            var user = UserRepository.GetUsers().Find(u => u.Email.Equals(userEmail));
-            if (user == null)
-            {
-                throw new Exception(WrongEmailMessage);
+            var isValidUser = ValidateUserByEmailAsync(userEmail).Result;
+            if (isValidUser)
+            { 
+                var addUserImageRequest = new AddUserImageRequest 
+                {
+                    Email = userEmail,
+                    ImageName = imageName
+                };
+                _clientRepository.AddUserImageAsync(addUserImageRequest);
             }
-
-            return user;
+            return isValidUser;
         }
 
-        private Image GetUserImageByName(string imageName, User user)
+        public bool UpdateUserPassword(string email, string password)
         {
-            var image = UserRepository.GetUserImages(user).Find(i => i.Name.Equals(imageName));
-            if (image == null)
+            var isValidUser = ValidateUserByEmailAsync(email).Result;
+            if (isValidUser) 
             {
-                throw new Exception("Doesn't exist: "+ image.Name + " image");
+                var userRequest = new AddUserRequest
+                {
+                    UserEmail = email,
+                    Password = password,
+                };
+                _clientRepository.UpdateUserPasswordAsync(userRequest);
             }
+            return isValidUser;
+        }
 
-            return image;
+        private async System.Threading.Tasks.Task<bool> ValidateUserByEmailAsync(string userEmail)
+        {
+            var response = await _clientRepository.GetUsersAsync(new EmptyMessagee());
+            var isValidUser = ConvertResponseToUser(response.Users).Any(u => u.Email.Equals(userEmail));
+            return isValidUser;
+        }
+
+        private bool ValidateImageByName(string imageName, ICollection<ImageProto> images)
+        {  
+            var existImage = images.ToList().Any(i => i.Name.Equals(imageName));
+            return existImage;
         }
     }
 }

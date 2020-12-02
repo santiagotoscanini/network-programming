@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Repository.Repositories;
+using Repository.RepositoriesInterfaces;
+using Repository.Services;
 
 namespace Repository
 {
@@ -13,6 +16,8 @@ namespace Repository
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddGrpc();
+            services.AddSingleton<ISessionRepository, SessionRepository>();
+            services.AddSingleton<IUserRepository, UserRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -28,6 +33,7 @@ namespace Repository
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapGrpcService<RepositoryService>();
+                endpoints.MapGrpcService<RepositoryUserService>();
 
                 endpoints.MapGet("/", async context =>
                 {

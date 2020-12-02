@@ -12,10 +12,8 @@ namespace Server
     class Server
     {
         private static readonly Dictionary<string, Communication> Clients = new Dictionary<string, Communication>();
-        // TODO esto no va
         private static readonly UserService UserService = new UserService();
         private static bool _isConnected = true;
-
         private static readonly SessionService SessionService = new SessionService(UserService);
 
         private const string InvalidUserDataMessage = "Invalid email or password";

@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+option csharp_namespace = "LogServer";
+
+package logger;
+
+service LoggerManager {
+  rpc GetLogs (EmptyMessage) returns (LogsResponse);
+}
+
+message EmptyMessage { }
+
+message LogsResponse {
+  repeated string logs = 1;
+}
+

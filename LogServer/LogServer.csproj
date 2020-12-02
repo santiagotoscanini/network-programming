@@ -5,12 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Protos\repoUser.proto" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Protobuf Include="Protos\repoUser.proto" GrpcServices="Server" />
-    <Protobuf Include="Protos\repo.proto" GrpcServices="Server" />
+    <Protobuf Include="Protos\logger.proto" GrpcServices="Server" />
   </ItemGroup>
 
   <ItemGroup>
@@ -19,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Domain\Domain.csproj" />
+    <Folder Include="ServiceInterfaces\" />
   </ItemGroup>
 
 </Project>

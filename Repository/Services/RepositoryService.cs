@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using Repository.RepositoriesInterfaces;
+using Repository.ServiceInterfaces;
 
 namespace Repository
 {
@@ -10,16 +11,19 @@ namespace Repository
     {
         private readonly ILogger<RepositoryService> _logger;
         private readonly ISessionRepository _sessionRepository;
+        private ILogSenderService _logSenderService;
 
-        public RepositoryService(ILogger<RepositoryService> logger, ISessionRepository sessionRepository)
+        public RepositoryService(ILogger<RepositoryService> logger, ISessionRepository sessionRepository, ILogSenderService logSenderService)
         {
             _logger = logger;
             _sessionRepository = sessionRepository;
+            _logSenderService = logSenderService;
         }
 
         public override Task<EmptyMessage> AddLoggedUser(AddLoggedUserRequest request, ServerCallContext context)
         {
             _sessionRepository.AddLoggedUser(request.UserEmail);
+            _logSenderService.SendMessages("Log: user " + request.UserEmail + " is logged");
             return Task.FromResult(new EmptyMessage {});
         }
 
@@ -35,6 +39,7 @@ namespace Repository
             {
                 getLoggedUsersToReturn.LoggedUsers.Add(user);
             }
+            _logSenderService.SendMessages("Log: the logged in users were obtained");
             return Task.FromResult(getLoggedUsersToReturn);
         }
 
@@ -42,6 +47,7 @@ namespace Repository
         {
             var loggedUser = _sessionRepository.GetLoggedUsers().Find(u => u.Email.Equals(request.Email));
             _sessionRepository.DeleteLoggedUser(loggedUser);
+            _logSenderService.SendMessages("Log: user "+ request.Email+" closed session");
             return Task.FromResult(new EmptyMessage {});
         }
     }

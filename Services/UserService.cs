@@ -11,7 +11,6 @@ namespace Services
     {
         private RepoUser.RepoUserClient _clientRepository = new RepoUser.RepoUserClient(GrpcChannel.ForAddress("https://localhost:5001"));
 
-        private const string InvalidUserDataMessage = "Invalid email or password";
         private const string UserAlreadyExistMessage = "Already exist user with that email";
         private const string WrongEmailMessage = "Wrong Email";
 

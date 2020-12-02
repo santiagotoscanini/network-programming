@@ -1,14 +1,17 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using LogServer.LoggerRepository;
+using LogServer.LoggerRepositoryInterface;
+using LogServer.Services;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Repository.Repositories;
-using Repository.RepositoriesInterfaces;
-using Repository.ServiceInterfaces;
-using Repository.Services;
 
-namespace Repository
+namespace LogServer
 {
     public class Startup
     {
@@ -17,9 +20,8 @@ namespace Repository
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddGrpc();
-            services.AddSingleton<ISessionRepository, SessionRepository>();
-            services.AddSingleton<IUserRepository, UserRepository>();
-            services.AddSingleton<ILogSenderService, LogSenderService>();
+            services.AddSingleton<ILogRepository, LogRepository>();
+            services.AddSingleton<ReceiverService, ReceiverService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -29,13 +31,11 @@ namespace Repository
             {
                 app.UseDeveloperExceptionPage();
             }
-
             app.UseRouting();
-
+            
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGrpcService<RepositoryService>();
-                endpoints.MapGrpcService<RepositoryUserService>();
+                endpoints.MapGrpcService<LoggerService>();
 
                 endpoints.MapGet("/", async context =>
                 {

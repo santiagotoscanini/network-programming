@@ -3,6 +3,7 @@ using Domain;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using Repository.RepositoriesInterfaces;
+using Repository.ServiceInterfaces;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,12 +14,15 @@ namespace Repository.Services
     {
         private readonly ILogger<RepositoryService> _logger;
         private readonly IUserRepository _userRepository;
+        private ILogSenderService _logSenderService;
 
-        public RepositoryUserService(ILogger<RepositoryService> logger, IUserRepository userRepository)
+        public RepositoryUserService(ILogger<RepositoryService> logger, IUserRepository userRepository, ILogSenderService logSenderService)
         {
             _logger = logger;
             _userRepository = userRepository;
+            _logSenderService = logSenderService;
         }
+
         public override Task<EmptyMessagee> AddUser(AddUserRequest request, ServerCallContext context)
         {
             var user = new User
@@ -27,6 +31,7 @@ namespace Repository.Services
                 Password = request.Password,
             };
             _userRepository.AddUser(user);
+            _logSenderService.SendMessages("Log: the user "+ user.Email +" was added");
             return Task.FromResult(new EmptyMessagee { });
         }
 
@@ -60,12 +65,14 @@ namespace Repository.Services
                 userToSave.Images.AddRange(images);
                 getUsersResponse.Users.Add(userToSave);
             }
+            _logSenderService.SendMessages("Log: registered users are requested");
             return Task.FromResult(getUsersResponse);
         }
 
         public override Task<EmptyMessagee> DeleteUser(AddUserRequest request, ServerCallContext context)
         {
             _userRepository.Delete(request.UserEmail);
+            _logSenderService.SendMessages("Log: user "+ request.UserEmail +" was deleted");
             return Task.FromResult(new EmptyMessagee { });
         }
 
@@ -77,6 +84,7 @@ namespace Repository.Services
                 Password = request.Password,
             };
             _userRepository.UpdateUserPassword(user);
+            _logSenderService.SendMessages("Log: user "+ user.Email +" was updated");
             return Task.FromResult(new EmptyMessagee { });
         }
 
@@ -85,6 +93,7 @@ namespace Repository.Services
             var user = new User { Email = request.Email };
             var image = new Image { Name = request.ImageName };
             _userRepository.AddUserImage(user, image);
+            _logSenderService.SendMessages("Log: the user"+ user.Email +" added the image "+ image.Name);
             return Task.FromResult(new EmptyMessagee { });
         }
 
@@ -107,6 +116,7 @@ namespace Repository.Services
                 imageToSave.Comments.AddRange(comments);
                 getUserImagesResponse.Images.Add(imageToSave);
             };
+            _logSenderService.SendMessages("Log: user "+request.UserEmail+" images were obtained");
             return Task.FromResult(getUserImagesResponse);
         }
 
@@ -118,6 +128,7 @@ namespace Repository.Services
                 UserEmail = request.Comment.UserEmail,
             };
             _userRepository.AddImageComment(request.UserEmail, request.ImageName, comment);
+            _logSenderService.SendMessages("Log: added a new comment to the user "+ request.UserEmail+" image "+ request.ImageName);
             return Task.FromResult(new EmptyMessagee { });
         }
 
@@ -130,6 +141,7 @@ namespace Repository.Services
                 Text = c.Text,
                 UserEmail = c.UserEmail,
             }));
+            _logSenderService.SendMessages("Log: user " + request.Email + " images "+ request.ImageName +" comments were obtained");
             return Task.FromResult(getImageCommentsResponse);
         }
     }

@@ -27,13 +27,13 @@ namespace Services
             return isCorrectUser;
         }
 
-        public async Task LogoutUserAsync(string email)
+        public void LogoutUserAsync(string email)
         {
-            var response = await _clientRepository.GetLoggedUsersAsync(new EmptyMessage());
+            var response = _clientRepository.GetLoggedUsers(new EmptyMessage());
             var getLoggedUser = response.LoggedUsers.FirstOrDefault(u => u.Email.Equals(email));
             if (getLoggedUser != null)
             {
-                _clientRepository.DeleteLoggedUserAsync(getLoggedUser);
+                _clientRepository.DeleteLoggedUser(getLoggedUser);
             }
         }
 

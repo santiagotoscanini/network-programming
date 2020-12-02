@@ -93,7 +93,7 @@ namespace Repository.Services
             var user = new User { Email = request.Email };
             var image = new Image { Name = request.ImageName };
             _userRepository.AddUserImage(user, image);
-            _logSenderService.SendMessages("Log: the user"+ user.Email +" added the image "+ image.Name);
+            _logSenderService.SendMessages("Log: the user "+ user.Email +" added the image "+ image.Name);
             return Task.FromResult(new EmptyMessagee { });
         }
 

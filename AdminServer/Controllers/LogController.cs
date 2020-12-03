@@ -21,9 +21,9 @@ namespace AdminServer.Controllers
         }
 
         [HttpGet]
-        public IActionResult AddUser()
+        public IActionResult GetLogs(int page = 1, int pageSize = 3)
         {
-            var logs = _logService.GetLogs().Select(l => new LogModel { Text = l });
+            var logs = _logService.GetLogs(page, pageSize).Elements.Select(l => new LogModel { Text = l });
             return Ok(logs);
         }
     }

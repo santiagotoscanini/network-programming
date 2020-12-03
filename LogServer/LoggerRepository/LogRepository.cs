@@ -5,7 +5,7 @@ namespace LogServer.LoggerRepository
 {
     public class LogRepository : ILogRepository
     {
-        private ICollection<string> _logs = new List<string>();
+        private ICollection<string> _logs = new List<string> ();
 
         public void AddLog(string log)
         {

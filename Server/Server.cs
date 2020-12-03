@@ -39,7 +39,7 @@ namespace Server
             Console.WriteLine("Starting server...");
             new Thread(StartListen).Start();
 
-            var server = new TcpListener(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 6000));
+            var server = new TcpListener(new IPEndPoint(IPAddress.Parse("127.0.0.1"), Constants.Constants.ServerPort));
             server.Start(100);
             
             WaitingForClients(server);

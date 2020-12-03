@@ -18,7 +18,7 @@ namespace Client
             TcpClient client = new TcpClient(clientIpEndPoint);
             
             Console.WriteLine("Attempting connection to server...");
-            var serverIpEndPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 6000);
+            var serverIpEndPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), Constants.Constants.ServerPort);
             client.Connect(serverIpEndPoint);
             
             NetworkStream stream = client.GetStream();

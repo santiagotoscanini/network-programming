@@ -10,7 +10,7 @@ namespace AdminServer.Service
 {
     public class UserService : IUserService
     {
-        private RepoUser.RepoUserClient _clientRepository = new RepoUser.RepoUserClient(GrpcChannel.ForAddress("https://localhost:5003"));
+        private RepoUser.RepoUserClient _clientRepository = new RepoUser.RepoUserClient(GrpcChannel.ForAddress(Constants.Constants.RepositoryRoute));
         private const string _userAlreadyExistMessage = "There is already a registered user with the email ";
         private const string _userNotExistMessage = "User does not exist ";
 

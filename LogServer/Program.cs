@@ -45,7 +45,7 @@ namespace LogServer
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
-                    webBuilder.UseUrls("https://localhost:5002");
+                    webBuilder.UseUrls(Constants.Constants.LogServerRoute);
                 });
     }
 }

@@ -22,7 +22,7 @@ namespace Repository
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
-                    webBuilder.UseUrls("https://localhost:5003");
+                    webBuilder.UseUrls(Constants.Constants.RepositoryRoute);
                 });
     }
 }

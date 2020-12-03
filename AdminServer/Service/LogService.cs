@@ -10,7 +10,7 @@ namespace AdminServer.Service
 {
     public class LogService : ILogService
     {
-        private LoggerManager.LoggerManagerClient _clientRepository = new LoggerManager.LoggerManagerClient(GrpcChannel.ForAddress("https://localhost:5002"));
+        private LoggerManager.LoggerManagerClient _clientRepository = new LoggerManager.LoggerManagerClient(GrpcChannel.ForAddress(Constants.Constants.LogServerRoute));
 
         public async Task<PaginatedResponse<string>> GetLogsAsync(int page, int pageSize)
         {

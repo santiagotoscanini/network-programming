@@ -19,8 +19,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LogServer", "LogServer\LogS
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AdminServer", "AdminServer\AdminServer.csproj", "{EF96CB3F-7B07-4725-A59E-1A0FC1E1B7B6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestRabbit", "TestRabbit\TestRabbit.csproj", "{3B050096-63DC-42D8-A07A-D685C2FBD589}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +53,10 @@ Global
 		{3BA3D103-2366-4739-A331-1FC80C60F37A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3BA3D103-2366-4739-A331-1FC80C60F37A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3BA3D103-2366-4739-A331-1FC80C60F37A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{873602C9-45F2-4DD8-9563-B6C20C4E93A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{873602C9-45F2-4DD8-9563-B6C20C4E93A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{873602C9-45F2-4DD8-9563-B6C20C4E93A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{873602C9-45F2-4DD8-9563-B6C20C4E93A0}.Release|Any CPU.Build.0 = Release|Any CPU
 		{EF96CB3F-7B07-4725-A59E-1A0FC1E1B7B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{EF96CB3F-7B07-4725-A59E-1A0FC1E1B7B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EF96CB3F-7B07-4725-A59E-1A0FC1E1B7B6}.Release|Any CPU.ActiveCfg = Release|Any CPU

@@ -9,13 +9,11 @@ namespace Repository
 {
     public class RepositoryService : Repo.RepoBase
     {
-        private readonly ILogger<RepositoryService> _logger;
         private readonly ISessionRepository _sessionRepository;
         private LogSenderService _logSenderService;
 
-        public RepositoryService(ILogger<RepositoryService> logger, ISessionRepository sessionRepository, LogSenderService logSenderService)
+        public RepositoryService(ISessionRepository sessionRepository, LogSenderService logSenderService)
         {
-            _logger = logger;
             _sessionRepository = sessionRepository;
             _logSenderService = logSenderService;
         }

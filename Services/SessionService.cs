@@ -1,7 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
-using Domain;
 using Grpc.Net.Client;
 using Repository;
 
@@ -17,36 +15,28 @@ namespace Services
             UserService = userService;
         }
 
-        public bool LoginUser(string userEmail, string userPassword)
+        public async Task<bool> LoginUserAsync(string userEmail, string userPassword)
         {
-            var isCorrectUser = UserService.ValidateUserAsync(userEmail, userPassword).Result;
-            if (isCorrectUser)
-            { 
-                _clientRepository.AddLoggedUserAsync(new AddLoggedUserRequest { UserEmail = userEmail });
-            }
+            var isCorrectUser = await UserService.ValidateUserAsync(userEmail, userPassword);
+            if (isCorrectUser) await _clientRepository.AddLoggedUserAsync(new AddLoggedUserRequest { UserEmail = userEmail });
             return isCorrectUser;
         }
 
-        public void LogoutUserAsync(string email)
+        public async Task LogoutUserAsync(string email)
         {
-            var response = _clientRepository.GetLoggedUsers(new EmptyMessage());
+            var response = await _clientRepository.GetLoggedUsersAsync(new EmptyMessage());
             var getLoggedUser = response.LoggedUsers.FirstOrDefault(u => u.Email.Equals(email));
-            if (getLoggedUser != null)
-            {
-                _clientRepository.DeleteLoggedUser(getLoggedUser);
-            }
+            if (getLoggedUser != null) await _clientRepository.DeleteLoggedUserAsync(getLoggedUser);
         }
 
         public async Task<string> GetLoggedUsersAsync()
         {
-            GetLoggedUsersResponse response = await _clientRepository.GetLoggedUsersAsync(new EmptyMessage());
-            return ConvertGetLoggedUserListToString(response);
+            return ConvertGetLoggedUserListToString(await _clientRepository.GetLoggedUsersAsync(new EmptyMessage()));
         }
 
         private string ConvertGetLoggedUserListToString(GetLoggedUsersResponse loggedUserList)
         {
-            return loggedUserList.LoggedUsers.ToList().Aggregate("",
-                (current, value) => current + ("|" + value.Email + " - " + value.ConnectionDate));
+            return loggedUserList.LoggedUsers.ToList().Aggregate("", (current, value) => current + ("|" + value.Email + " - " + value.ConnectionDate));
         }
     }
 }

@@ -46,44 +46,45 @@ namespace Services
             return usersEmails.Aggregate("", (current, user) => current + user + " ");
         }
 
-        public void CreateUser(string email, string password)
+        public async System.Threading.Tasks.Task<EmptyMessagee> CreateUserAsync(string email, string password)
         {
             var userRequest = new AddUserRequest
             {
                 UserEmail = email,
                 Password = password,
             };
-            VerifyUser(userRequest);
-            _clientRepository.AddUserAsync(userRequest);
+            await VerifyUserAsync(userRequest);
+            return await _clientRepository.AddUserAsync(userRequest);
         }
 
-        private void VerifyUser(AddUserRequest user)
+        private async System.Threading.Tasks.Task VerifyUserAsync(AddUserRequest user)
         {
-            var alreadyExist = GetUsersAsync().Result.Contains(user.UserEmail);
+            var users = await GetUsersAsync();
+            bool alreadyExist = users.Contains(user.UserEmail);
             if (alreadyExist)
             {
                 throw new Exception(UserAlreadyExistMessage);
             }
         }
 
-        public bool DeleteUser(string email)
+        public async System.Threading.Tasks.Task<bool> DeleteUserAsync(string email)
         {
-            var isValidUser = ValidateUserByEmailAsync(email).Result;
-            if (isValidUser) 
+            var isValidUser = await ValidateUserByEmailAsync(email);
+            if (isValidUser)
             {
                 var userRequest = new AddUserRequest
                 {
                     UserEmail = email,
                 };
-                _clientRepository.DeleteUserAsync(userRequest);
+                await _clientRepository.DeleteUserAsync(userRequest);
             }
             return isValidUser;
         }
 
         public async System.Threading.Tasks.Task<bool> AddImageCommentAsync(string commentText, string imageName, string userEmail, string userCommentEmail)
         {
-            var isValidUser = ValidateUserByEmailAsync(userEmail).Result;
-            var isValidUserComment = ValidateUserByEmailAsync(userCommentEmail).Result;
+            var isValidUser = await ValidateUserByEmailAsync(userEmail);
+            var isValidUserComment = await ValidateUserByEmailAsync(userCommentEmail);
             if (isValidUser && isValidUserComment) 
             {
                 var imagesResponse = await _clientRepository.GetUserImagesAsync(new AddUserRequest { UserEmail = userEmail});
@@ -101,7 +102,7 @@ namespace Services
                         ImageName = imageName,
                         Comment = comment
                     };
-                    _clientRepository.AddImageCommentAsync(addImageCommentRequest);
+                    await _clientRepository.AddImageCommentAsync(addImageCommentRequest);
                 }
                 return isValidImage;
             }
@@ -110,7 +111,7 @@ namespace Services
 
         public async System.Threading.Tasks.Task<string> GetUserImagesAsync(string userEmail)
         {
-            var isValidUser = ValidateUserByEmailAsync(userEmail).Result;
+            var isValidUser = await ValidateUserByEmailAsync(userEmail);
             if (isValidUser) 
             {
                 var request = new AddUserRequest { UserEmail = userEmail };
@@ -129,7 +130,7 @@ namespace Services
         
         public async System.Threading.Tasks.Task<string> GetImageCommentsAsync(string userEmail, string imageName)
         {
-            var isValidUser = ValidateUserByEmailAsync(userEmail).Result;
+            var isValidUser = await ValidateUserByEmailAsync(userEmail);
             if (isValidUser) {
                 var imagesResponse = await _clientRepository.GetUserImagesAsync(new AddUserRequest { UserEmail = userEmail });
                 if (ValidateImageByName(imageName, imagesResponse.Images))
@@ -154,9 +155,9 @@ namespace Services
             return imageComments.Aggregate("", (current, comment) => current + comment + " ");
         }
         
-        public bool AddUserImage(string imageName, string userEmail)
+        public async System.Threading.Tasks.Task<bool> AddUserImageAsync(string imageName, string userEmail)
         {
-            var isValidUser = ValidateUserByEmailAsync(userEmail).Result;
+            var isValidUser = await ValidateUserByEmailAsync(userEmail);
             if (isValidUser)
             { 
                 var addUserImageRequest = new AddUserImageRequest 
@@ -164,22 +165,22 @@ namespace Services
                     Email = userEmail,
                     ImageName = imageName
                 };
-                _clientRepository.AddUserImageAsync(addUserImageRequest);
+                await _clientRepository.AddUserImageAsync(addUserImageRequest);
             }
             return isValidUser;
         }
 
-        public bool UpdateUserPassword(string email, string password)
+        public async System.Threading.Tasks.Task<bool> UpdateUserPasswordAsync(string email, string password)
         {
-            var isValidUser = ValidateUserByEmailAsync(email).Result;
-            if (isValidUser) 
+            var isValidUser = await ValidateUserByEmailAsync(email);
+            if (isValidUser)
             {
                 var userRequest = new AddUserRequest
                 {
                     UserEmail = email,
                     Password = password,
                 };
-                _clientRepository.UpdateUserPasswordAsync(userRequest);
+                await _clientRepository.UpdateUserPasswordAsync(userRequest);
             }
             return isValidUser;
         }

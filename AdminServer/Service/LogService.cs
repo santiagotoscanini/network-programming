@@ -3,14 +3,14 @@ using AdminServer.ServiceInterface;
 using Grpc.Net.Client;
 using LogServer;
 using System;
-using System.Linq;
+using static Constants.Constants;
 using System.Threading.Tasks;
 
 namespace AdminServer.Service
 {
     public class LogService : ILogService
     {
-        private LoggerManager.LoggerManagerClient _clientRepository = new LoggerManager.LoggerManagerClient(GrpcChannel.ForAddress(Constants.Constants.LogServerRoute));
+        private LoggerManager.LoggerManagerClient _clientRepository = new LoggerManager.LoggerManagerClient(GrpcChannel.ForAddress(String.Format(UriToFormat, localhostHttps, LogServerPort)));
 
         public async Task<PaginatedResponse<string>> GetLogsAsync(int page, int pageSize)
         {

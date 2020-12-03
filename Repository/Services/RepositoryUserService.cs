@@ -29,7 +29,7 @@ namespace Repository.Services
                 Password = request.Password,
             };
             _userRepository.AddUser(user);
-            _logSenderService.SendMessages("Log: the user "+ user.Email +" was added");
+            _logSenderService.SendMessages("the user "+ user.Email +" was added");
             return Task.FromResult(new EmptyMessagee { });
         }
 
@@ -63,14 +63,14 @@ namespace Repository.Services
                 userToSave.Images.AddRange(images);
                 getUsersResponse.Users.Add(userToSave);
             }
-            _logSenderService.SendMessages("Log: registered users are requested");
+            _logSenderService.SendMessages("registered users are requested");
             return Task.FromResult(getUsersResponse);
         }
 
         public override Task<EmptyMessagee> DeleteUser(AddUserRequest request, ServerCallContext context)
         {
             _userRepository.Delete(request.UserEmail);
-            _logSenderService.SendMessages("Log: user "+ request.UserEmail +" was deleted");
+            _logSenderService.SendMessages("user "+ request.UserEmail +" was deleted");
             return Task.FromResult(new EmptyMessagee { });
         }
 
@@ -82,7 +82,7 @@ namespace Repository.Services
                 Password = request.Password,
             };
             _userRepository.UpdateUserPassword(user);
-            _logSenderService.SendMessages("Log: user "+ user.Email +" was updated");
+            _logSenderService.SendMessages("user "+ user.Email +" was updated");
             return Task.FromResult(new EmptyMessagee { });
         }
 
@@ -91,7 +91,7 @@ namespace Repository.Services
             var user = new User { Email = request.Email };
             var image = new Image { Name = request.ImageName };
             _userRepository.AddUserImage(user, image);
-            _logSenderService.SendMessages("Log: the user "+ user.Email +" added the image "+ image.Name);
+            _logSenderService.SendMessages("the user "+ user.Email +" added the image "+ image.Name);
             return Task.FromResult(new EmptyMessagee { });
         }
 
@@ -114,7 +114,7 @@ namespace Repository.Services
                 imageToSave.Comments.AddRange(comments);
                 getUserImagesResponse.Images.Add(imageToSave);
             };
-            _logSenderService.SendMessages("Log: user "+request.UserEmail+" images were obtained");
+            _logSenderService.SendMessages("user "+request.UserEmail+" images were obtained");
             return Task.FromResult(getUserImagesResponse);
         }
 
@@ -126,7 +126,7 @@ namespace Repository.Services
                 UserEmail = request.Comment.UserEmail,
             };
             _userRepository.AddImageComment(request.UserEmail, request.ImageName, comment);
-            _logSenderService.SendMessages("Log: added a new comment to the user "+ request.UserEmail+" image "+ request.ImageName);
+            _logSenderService.SendMessages("added a new comment to the user "+ request.UserEmail+" image "+ request.ImageName);
             return Task.FromResult(new EmptyMessagee { });
         }
 
@@ -139,7 +139,7 @@ namespace Repository.Services
                 Text = c.Text,
                 UserEmail = c.UserEmail,
             }));
-            _logSenderService.SendMessages("Log: user " + request.Email + " images "+ request.ImageName +" comments were obtained");
+            _logSenderService.SendMessages("user " + request.Email + " images "+ request.ImageName +" comments were obtained");
             return Task.FromResult(getImageCommentsResponse);
         }
     }

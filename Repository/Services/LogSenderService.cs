@@ -1,20 +1,28 @@
 ﻿using RabbitMQ.Client;
 using System.Text;
+using static Constants.Constants;
+using System;
 
 namespace Repository.Services
 {
     public class LogSenderService
     {
         private const string _queueName = "logQueue";
+        private IModel _channel;
+
+        public LogSenderService()
+        {
+            _channel = new ConnectionFactory { HostName = "localhost" }.CreateConnection().CreateModel();
+            QueueDeclare(_channel);
+        }
 
         public void SendMessages(string logToSend)
         {
-            var connectionFactory = new ConnectionFactory { HostName = "localhost" };
-            IConnection connection = connectionFactory.CreateConnection();
-            IModel channel = connection.CreateModel();
-            QueueDeclare(channel);
-            PublishMessage(logToSend, channel);
+            logToSend = string.Format(InfoLogFormat, DateTime.Today.ToString("D"), "Repository Server", logToSend);
+
+            PublishMessage(logToSend, _channel);
         }
+
         private void QueueDeclare(IModel channel)
         {
             channel.QueueDeclare(queue: _queueName, durable: false, exclusive: false, autoDelete: false, arguments: null);

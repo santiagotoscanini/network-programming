@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using NetworkCommunication;
+using static Constants.Constants;
 
 namespace Client
 {
@@ -14,11 +15,11 @@ namespace Client
         static void Main(string[] args)
         {
             Console.WriteLine("Starting client...");
-            var clientIpEndPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 0);
+            var clientIpEndPoint = new IPEndPoint(IPAddress.Parse(localhost), 0);
             TcpClient client = new TcpClient(clientIpEndPoint);
             
             Console.WriteLine("Attempting connection to server...");
-            var serverIpEndPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), Constants.Constants.ServerPort);
+            var serverIpEndPoint = new IPEndPoint(IPAddress.Parse(localhost), TcpServerPort);
             client.Connect(serverIpEndPoint);
             
             NetworkStream stream = client.GetStream();

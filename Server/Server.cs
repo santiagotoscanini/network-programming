@@ -1,4 +1,5 @@
 ﻿using System;
+using static Constants.Constants;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
@@ -39,8 +40,8 @@ namespace Server
             Console.WriteLine("Starting server...");
             new Thread(StartListen).Start();
 
-            var server = new TcpListener(new IPEndPoint(IPAddress.Parse("127.0.0.1"), Constants.Constants.ServerPort));
-            server.Start(100);
+            var server = new TcpListener(new IPEndPoint(IPAddress.Parse(localhost), TcpServerPort));
+            server.Start(MaxNumberOfTcpClients);
             
             WaitingForClients(server);
         }

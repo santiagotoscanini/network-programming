@@ -1,7 +1,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Grpc.Core;
-using Microsoft.Extensions.Logging;
 using Repository.RepositoriesInterfaces;
 using Repository.Services;
 
@@ -21,7 +20,7 @@ namespace Repository
         public override Task<EmptyMessage> AddLoggedUser(AddLoggedUserRequest request, ServerCallContext context)
         {
             _sessionRepository.AddLoggedUser(request.UserEmail);
-            _logSenderService.SendMessages("Log: user " + request.UserEmail + " is logged");
+            _logSenderService.SendMessages("user " + request.UserEmail + " is logged");
             return Task.FromResult(new EmptyMessage {});
         }
 
@@ -37,7 +36,7 @@ namespace Repository
             {
                 getLoggedUsersToReturn.LoggedUsers.Add(user);
             }
-            _logSenderService.SendMessages("Log: the logged in users were obtained");
+            _logSenderService.SendMessages("the logged in users were obtained");
             return Task.FromResult(getLoggedUsersToReturn);
         }
 
@@ -45,7 +44,7 @@ namespace Repository
         {
             var loggedUser = _sessionRepository.GetLoggedUsers().Find(u => u.Email.Equals(request.Email));
             _sessionRepository.DeleteLoggedUser(loggedUser);
-            _logSenderService.SendMessages("Log: user "+ request.Email+" closed session");
+            _logSenderService.SendMessages("user " + request.Email + " closed session");
             return Task.FromResult(new EmptyMessage {});
         }
     }

@@ -4,12 +4,13 @@ using System.Linq;
 using Domain;
 using Grpc.Net.Client;
 using Repository;
+using static Constants.Constants;
 
 namespace Services
 {
     public class UserService
     {
-        private RepoUser.RepoUserClient _clientRepository = new RepoUser.RepoUserClient(GrpcChannel.ForAddress(Constants.Constants.RepositoryRoute));
+        private RepoUser.RepoUserClient _clientRepository = new RepoUser.RepoUserClient(GrpcChannel.ForAddress(String.Format(UriToFormat, localhostHttps, RepositoryPort)));
 
         private const string UserAlreadyExistMessage = "Already exist user with that email";
         private const string WrongEmailMessage = "Wrong Email";

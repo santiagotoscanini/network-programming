@@ -1,14 +1,16 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Grpc.Net.Client;
 using Repository;
+using static Constants.Constants;
 
 namespace Services
 {
     public class SessionService
     {
         private UserService UserService { get; }
-        private Repo.RepoClient _clientRepository = new Repo.RepoClient(GrpcChannel.ForAddress(Constants.Constants.RepositoryRoute));
+        private Repo.RepoClient _clientRepository = new Repo.RepoClient(GrpcChannel.ForAddress(String.Format(UriToFormat, localhostHttps, RepositoryPort)));
 
         public SessionService(UserService userService)
         {

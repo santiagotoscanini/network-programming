@@ -1,8 +1,5 @@
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
+using static Constants.Constants;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
@@ -22,7 +19,7 @@ namespace Repository
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
-                    webBuilder.UseUrls(Constants.Constants.RepositoryRoute);
+                    webBuilder.UseUrls(String.Format(UriToFormat, localhostHttps, RepositoryPort));
                 });
     }
 }

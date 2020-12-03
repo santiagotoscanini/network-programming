@@ -5,12 +5,13 @@ using Repository;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using static Constants.Constants;
 
 namespace AdminServer.Service
 {
     public class UserService : IUserService
     {
-        private RepoUser.RepoUserClient _clientRepository = new RepoUser.RepoUserClient(GrpcChannel.ForAddress(Constants.Constants.RepositoryRoute));
+        private RepoUser.RepoUserClient _clientRepository = new RepoUser.RepoUserClient(GrpcChannel.ForAddress(String.Format(UriToFormat, localhostHttps, RepositoryPort)));
         private const string _userAlreadyExistMessage = "There is already a registered user with the email ";
         private const string _userNotExistMessage = "User does not exist ";
 

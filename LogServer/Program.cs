@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using static Constants.Constants;
 
 namespace LogServer
 {
@@ -45,7 +46,7 @@ namespace LogServer
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
-                    webBuilder.UseUrls(Constants.Constants.LogServerRoute);
+                    webBuilder.UseUrls(String.Format(UriToFormat, localhostHttps, LogServerPort));
                 });
     }
 }

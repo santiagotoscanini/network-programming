@@ -10,7 +10,7 @@ namespace Constants
         private const string _repositoryRoute = "https://localhost:5003";
         public static readonly string RepositoryRoute = _repositoryRoute;
 
-        private const int _serverPort = 6000;
+        public static readonly int _serverPort = 6000;
         public static readonly int ServerPort = _serverPort;
     }
 }

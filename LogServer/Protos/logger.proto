@@ -5,12 +5,14 @@ option csharp_namespace = "LogServer";
 package logger;
 
 service LoggerManager {
-  rpc GetLogs (EmptyMessage) returns (LogsResponse);
+  rpc GetLogs (PaginationRequest) returns (LogsResponse);
 }
-
-message EmptyMessage { }
 
 message LogsResponse {
   repeated string logs = 1;
 }
 
+message PaginationRequest{
+	int32 page = 1;
+	int32 pageSize = 2;
+}

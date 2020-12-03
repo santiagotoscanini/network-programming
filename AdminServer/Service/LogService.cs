@@ -18,20 +18,17 @@ namespace AdminServer.Service
             {
                 return new PaginatedResponse<string>();
             }
-            var response = await _clientRepository.GetLogsAsync(new EmptyMessage { });
-            int offset = (page - 1) * pageSize;
-            if (offset > response.Logs.Count)
+            var response = await _clientRepository.GetLogsAsync(new PaginationRequest 
             {
-                return new PaginatedResponse<string> ();
-            }
-
-            int lessCount = response.Logs.Count - (page * pageSize);
-            var count = lessCount >= 0 ? pageSize : Math.Abs(pageSize + lessCount);
+                Page = page,
+                PageSize = pageSize,
+            });
+            
             return new PaginatedResponse<string>
             {
                 TotalElements = response.Logs.Count,
                 TotalPages = (int)Math.Ceiling((double)response.Logs.Count / pageSize),
-                Elements = response.Logs.ToList().GetRange(offset, count),
+                Elements = response.Logs,
             };
         }
     }

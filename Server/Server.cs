@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using NetworkCommunication;
 using Services;
 
@@ -55,7 +56,7 @@ namespace Server
             }
         }
 
-        private static async System.Threading.Tasks.Task<string> ExecuteServerRequestAsync(string message)
+        private static async Task<string> ExecuteServerRequestAsync(string message)
         {
             try
             {
@@ -86,7 +87,7 @@ namespace Server
                             case "user":
                                 var email = words[2];
                                 var password = words[3];
-                                return CreateUser(email, password);
+                                return await CreateUserAsync(email, password);
                         }
 
                         break;
@@ -96,7 +97,7 @@ namespace Server
                         {
                             case "user":
                                 var email = words[2];
-                                return DeleteUser(email);
+                                return await DeleteUserAsync(email);
                         }
 
                         break;
@@ -107,7 +108,7 @@ namespace Server
                             case "user":
                                 var email = words[2];
                                 var password = words[3];
-                                return UpdateUserPassword(email, password);
+                                return await UpdateUserPasswordAsync(email, password);
                         }
 
                         break;
@@ -121,7 +122,7 @@ namespace Server
             }
         }
 
-        private static string ExecuteUserRequest(string message)
+        private async static Task<string> ExecuteUserRequestAsync(string message)
         {
             try
             {
@@ -138,14 +139,14 @@ namespace Server
                         switch (element)
                         {
                             case "users":
-                                return UserService.GetUsersAsync().Result;
+                                return await UserService.GetUsersAsync();
                             case "images":
                                 var email = words[2];
-                                return GetUserImages(email);
+                                return await GetUserImagesAsync(email);
                             case "comments":
                                 var userEmail = words[2];
                                 var imageName = words[3];
-                                return GetImageComments(userEmail, imageName);
+                                return await GetImageCommentsAsync(userEmail, imageName);
                         }
 
                         break;
@@ -155,7 +156,9 @@ namespace Server
                         {
                             case "logout":
                                 var email = words[2];
-                                return Logout(email);
+                                await LogoutAsync(email);
+                                Thread.CurrentThread.Join();
+                                break;
                         }
 
                         break;
@@ -165,14 +168,13 @@ namespace Server
                         {
                             case "image":
                                 var email = words[2];
-                                return ReceiveFile(email);
+                                return await ReceiveFileAsync(email);
                             case "comment":
                                 var userImageEmail = words[2];
                                 var imageName = words[3];
                                 var userEmail = words[4];
                                 var comment = words[5];
-                                return CreateImageComment(comment, imageName, userImageEmail,
-                                    userEmail);
+                                return await CreateImageCommentAsync(comment, imageName, userImageEmail, userEmail);
                         }
 
                         break;
@@ -193,11 +195,11 @@ namespace Server
                 TcpClient client = server.AcceptTcpClient();
                 NetworkStream stream = client.GetStream();
                 var communication = new Communication(stream);
-                new Thread(() => StartingUserInteraction(communication)).Start();
+                new Thread(async () => await StartingUserInteractionAsync(communication)).Start();
             }
         }
 
-        private static void StartingUserInteraction(Communication communication)
+        private async static Task StartingUserInteractionAsync(Communication communication)
         {
             Write(communication,
                 "Welcome, if you want to login in your account write: 'login' or if you want to register write: 'register'");
@@ -206,60 +208,69 @@ namespace Server
             // TODO: arreglar esto
             {
                 case "login":
-                    Login(communication);
+                    await LoginAsync(communication);
                     break;
                 case "register":
-                    Register(communication);
+                    await RegisterAsync(communication);
                     break;
                 default:
-                    StartingUserInteraction(communication);
+                    await StartingUserInteractionAsync(communication);
                     break;
             }
 
             Write(communication,
                 "You are connected to InstaFoto, write 'help' to know what commands you can execute. Enjoy!");
-            Read(communication);
+            await ReadAsync(communication);
         }
 
-        private static string Login(Communication communication)
+        private async static Task<string> LoginAsync(Communication communication)
         {
-            Write(communication, "Write your email:");
-            string userEmail = ReadInfo(communication);
+            bool isCorrectUser = false;
+            string userEmail = "";
+            while (!isCorrectUser)
+            {
+                Write(communication, "Write your email:");
+                userEmail = ReadInfo(communication);
 
-            Write(communication, "Write your password:");
-            string userPassword = ReadInfo(communication);
-            
-            var isCorrectUser = SessionService.LoginUser(userEmail, userPassword);
-            if (isCorrectUser) 
-            { 
-                Clients.Add(userEmail, communication);
-            }
-            else { 
-                Write(communication, InvalidUserDataMessage);
-                // TODO: Cambiar esto
-                return Login(communication);
+                Write(communication, "Write your password:");
+                string userPassword = ReadInfo(communication);
+
+                isCorrectUser = await SessionService.LoginUserAsync(userEmail, userPassword);
+
+                if (isCorrectUser)
+                {
+                    Clients.Add(userEmail, communication);
+                }
+                else
+                {
+                    Write(communication, InvalidUserDataMessage);
+                }
             }
 
             return userEmail;
         }
 
-        private static string Register(Communication communication)
+        private async static Task<string> RegisterAsync(Communication communication)
         {
-            Write(communication, "Write your email:");
-            string userEmail = ReadInfo(communication);
-            Write(communication, "Write your password:");
-            string userPassword = ReadInfo(communication);
-            try
+            bool isCorrectUser = false;
+            string userEmail = "";
+            while (!isCorrectUser)
             {
-                UserService.CreateUser(userEmail, userPassword);
-                SessionService.LoginUser(userEmail, userPassword);
-                Clients.Add(userEmail, communication);
-            }
-            catch (Exception e)
-            {
-                Write(communication, e.Message);
-                // Cambiar esto
-                return Register(communication);
+                Write(communication, "Write your email:");
+                userEmail = ReadInfo(communication);
+                Write(communication, "Write your password:");
+                string userPassword = ReadInfo(communication);
+                try
+                {
+                    await UserService.CreateUserAsync(userEmail, userPassword);
+                    await SessionService.LoginUserAsync(userEmail, userPassword);
+                    Clients.Add(userEmail, communication);
+                    isCorrectUser = true;
+                }
+                catch (Exception e)
+                {
+                    Write(communication, e.Message);
+                }
             }
 
             return userEmail;
@@ -283,7 +294,7 @@ namespace Server
             communication.Write(data);
         }
 
-        private static void Read(Communication communication)
+        private async static Task ReadAsync(Communication communication)
         {
             while (true)
             {
@@ -293,7 +304,8 @@ namespace Server
                     int dataSize = BitConverter.ToInt32(dataLength, 0);
                     byte[] data = communication.Read(dataSize);
                     var msg = Encoding.UTF8.GetString(data);
-                    Write(communication, ExecuteUserRequest(msg));
+                    var result = await ExecuteUserRequestAsync(msg);
+                    Write(communication, result);
                 }
                 catch (System.IO.IOException)
                 {
@@ -302,11 +314,11 @@ namespace Server
             }
         }
 
-        private static string CreateUser(string email, string password)
+        private async static Task<string> CreateUserAsync(string email, string password)
         {
             try
             {
-                UserService.CreateUser(email, password);
+                await UserService.CreateUserAsync(email, password);
                 return "Created";
             }
             catch (Exception e)
@@ -315,13 +327,12 @@ namespace Server
             }
         }
 
-        private static string Logout(string email)
+        private async static Task<string> LogoutAsync(string email)
         {
             try
             {
-                SessionService.LogoutUserAsync(email);
+                await SessionService.LogoutUserAsync(email);
                 Clients.Remove(email);
-                // TODO: cerrar el hilo de aca
                 return "You session was closed and you are disconnected";
             }
             catch (Exception e)
@@ -330,24 +341,23 @@ namespace Server
             }
         }
 
-        private static string DeleteUser(string email)
+        private async static Task<string> DeleteUserAsync(string email)
         {
             
-            var isDeleted = UserService.DeleteUser(email);
+            var isDeleted = await UserService.DeleteUserAsync(email);
             if (!isDeleted)
             {
                 return InvalidUserEmailMessage;
             }
-            return "User deleted";
-           
+            return "User deleted";   
         }
 
-        private static string ReceiveFile(string email)
+        private async static Task<string> ReceiveFileAsync(string email)
         {
             try
             {
                 var imageName = Clients.GetValueOrDefault(email)?.ReceiveFile();
-                var isSaved = UserService.AddUserImage(imageName, email);
+                var isSaved = await UserService.AddUserImageAsync(imageName, email);
                 if (!isSaved)
                 {
                     return InvalidUserEmailMessage;
@@ -360,12 +370,11 @@ namespace Server
             }
         }
 
-        private static string CreateImageComment(string commentText, string imageName, string userEmail,
-            string userCommentEmail)
+        private async static Task<string> CreateImageCommentAsync(string commentText, string imageName, string userEmail, string userCommentEmail)
         {
             try
             {
-                var isCommentSaved = UserService.AddImageCommentAsync(commentText, imageName, userEmail, userCommentEmail).Result;
+                var isCommentSaved = await UserService.AddImageCommentAsync(commentText, imageName, userEmail, userCommentEmail);
                 if (isCommentSaved)
                 {
                     return "Comment Saved";
@@ -381,9 +390,9 @@ namespace Server
             }
         }
 
-        private static string UpdateUserPassword(string email, string password)
+        private async static Task<string> UpdateUserPasswordAsync(string email, string password)
         {
-            var isSaved = UserService.UpdateUserPassword(email, password);
+            var isSaved = await UserService.UpdateUserPasswordAsync(email, password);
             if (!isSaved)
             {
                 return InvalidUserEmailMessage;
@@ -391,11 +400,11 @@ namespace Server
             return "Change saved";
         }
 
-        private static string GetUserImages(string email)
+        private async static Task<string> GetUserImagesAsync(string email)
         {
             try
             {
-                return UserService.GetUserImagesAsync(email).Result;
+                return await UserService.GetUserImagesAsync(email);
             }
             catch (Exception e)
             {
@@ -403,11 +412,11 @@ namespace Server
             }
         }
 
-        private static string GetImageComments(string userEmail, string imageName)
+        private async static Task<string> GetImageCommentsAsync(string userEmail, string imageName)
         {
             try
             {
-                return UserService.GetImageCommentsAsync(userEmail, imageName).Result;
+                return await UserService.GetImageCommentsAsync(userEmail, imageName);
             }
             catch (Exception e)
             {

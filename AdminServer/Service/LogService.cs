@@ -3,7 +3,6 @@ using AdminServer.ServiceInterface;
 using Grpc.Net.Client;
 using LogServer;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -13,13 +12,13 @@ namespace AdminServer.Service
     {
         private LoggerManager.LoggerManagerClient _clientRepository = new LoggerManager.LoggerManagerClient(GrpcChannel.ForAddress("https://localhost:5002"));
 
-        public PaginatedResponse<string> GetLogs(int page, int pageSize)
+        public async Task<PaginatedResponse<string>> GetLogsAsync(int page, int pageSize)
         {
             if (page <= 0 || pageSize <= 0)
             {
                 return new PaginatedResponse<string>();
             }
-            var response = _clientRepository.GetLogs(new EmptyMessage { });
+            var response = await _clientRepository.GetLogsAsync(new EmptyMessage { });
             int offset = (page - 1) * pageSize;
             if (offset > response.Logs.Count)
             {

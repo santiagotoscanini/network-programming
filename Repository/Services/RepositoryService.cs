@@ -3,19 +3,17 @@ using System.Threading.Tasks;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using Repository.RepositoriesInterfaces;
-using Repository.ServiceInterfaces;
+using Repository.Services;
 
 namespace Repository
 {
     public class RepositoryService : Repo.RepoBase
     {
-        private readonly ILogger<RepositoryService> _logger;
         private readonly ISessionRepository _sessionRepository;
-        private ILogSenderService _logSenderService;
+        private LogSenderService _logSenderService;
 
-        public RepositoryService(ILogger<RepositoryService> logger, ISessionRepository sessionRepository, ILogSenderService logSenderService)
+        public RepositoryService(ISessionRepository sessionRepository, LogSenderService logSenderService)
         {
-            _logger = logger;
             _sessionRepository = sessionRepository;
             _logSenderService = logSenderService;
         }

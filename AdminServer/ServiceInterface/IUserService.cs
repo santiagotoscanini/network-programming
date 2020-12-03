@@ -1,17 +1,14 @@
 ﻿using Domain;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace AdminServer.ServiceInterface
 {
     public interface IUserService
     {
-        void AddUser(User user);
+        Task AddUserAsync(User user);
 
-        void UpdateUser(User user);
+        Task UpdateUserAsync(User user);
 
-        void DeleteUser(User user);
+        Task DeleteUserAsync(User user);
     }
 }

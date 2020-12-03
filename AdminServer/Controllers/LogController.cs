@@ -21,10 +21,11 @@ namespace AdminServer.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetLogs(int page = 1, int pageSize = 3)
+        public async Task<IActionResult> GetLogs(int page = 1, int pageSize = 3)
         {
-            var logs = _logService.GetLogs(page, pageSize).Elements.Select(l => new LogModel { Text = l });
-            return Ok(logs);
+            var logs = await _logService.GetLogsAsync(page, pageSize);
+            var logsModels = logs.Elements.Select(l => new LogModel { Text = l });
+            return Ok(logsModels);
         }
     }
 }

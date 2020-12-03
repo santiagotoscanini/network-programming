@@ -4,6 +4,7 @@ using Grpc.Net.Client;
 using Repository;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace AdminServer.Service
 {
@@ -13,9 +14,9 @@ namespace AdminServer.Service
         private const string _userAlreadyExistMessage = "There is already a registered user with the email ";
         private const string _userNotExistMessage = "User does not exist ";
 
-        public void AddUser(User user)
+        public async Task AddUserAsync(User user)
         {
-            var alreadyExist = UserAlreadyExist(user.Email);
+            var alreadyExist = await UserAlreadyExistAsync(user.Email);
             if (alreadyExist)
             {
                 throw new InvalidOperationException(_userAlreadyExistMessage + user.Email);
@@ -25,18 +26,18 @@ namespace AdminServer.Service
                 UserEmail = user.Email,
                 Password = user.Password,
             };
-            _clientRepository.AddUserAsync(userRequest);
+            await _clientRepository.AddUserAsync(userRequest);
         }
 
-        private bool UserAlreadyExist(string email)
+        private async Task<bool> UserAlreadyExistAsync(string email)
         {
-            var users = _clientRepository.GetUsers(new EmptyMessagee { });
-            return users.Users.Select(u => u.UserEmail.Equals(email)).Any();
+            var users = await _clientRepository.GetUsersAsync(new EmptyMessagee { });
+            return users.Users.Any(u => u.UserEmail.Equals(email));
         }
 
-        public void UpdateUser(User user)
+        public async Task UpdateUserAsync(User user)
         {
-            var alreadyExist = UserAlreadyExist(user.Email);
+            var alreadyExist = await UserAlreadyExistAsync(user.Email);
             if (!alreadyExist)
             {
                 throw new InvalidOperationException(_userNotExistMessage + user.Email);
@@ -46,12 +47,12 @@ namespace AdminServer.Service
                 UserEmail = user.Email,
                 Password = user.Password,
             };
-            _clientRepository.UpdateUserPasswordAsync(userRequest);
+            await _clientRepository.UpdateUserPasswordAsync(userRequest);
         }
 
-        public void DeleteUser(User user)
+        public async Task DeleteUserAsync(User user)
         {
-            var alreadyExist = UserAlreadyExist(user.Email);
+            var alreadyExist = await UserAlreadyExistAsync(user.Email);
             if (!alreadyExist)
             {
                 throw new InvalidOperationException(_userNotExistMessage + user.Email);
@@ -60,7 +61,7 @@ namespace AdminServer.Service
             {
                 UserEmail = user.Email,
             };
-            _clientRepository.DeleteUserAsync(userRequest);
+            await _clientRepository.DeleteUserAsync(userRequest);
         }
     }
 }

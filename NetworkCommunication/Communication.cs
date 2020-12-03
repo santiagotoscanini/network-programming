@@ -12,8 +12,6 @@ namespace NetworkCommunication
             _networkStream = networkStream;
         }
 
-        
-        
         public void Write(byte[] data)
         {
             _networkStream.Write(data, 0, data.Length);

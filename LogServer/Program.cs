@@ -1,22 +1,45 @@
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
+using LogServer.LoggerRepository;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 
 namespace LogServer
 {
     public class Program
     {
+        private const string QueueName = "logQueue";
+        
         public static void Main(string[] args)
         {
+            ReceiveLogs();
             CreateHostBuilder(args).Build().Run();
         }
 
-        // Additional configuration is required to successfully run gRPC on macOS.
-        // For instructions on how to configure Kestrel and gRPC clients on macOS, visit https://go.microsoft.com/fwlink/?linkid=2099682
+        private static void ReceiveLogs()
+        {
+            IModel channel = new ConnectionFactory { HostName = "localhost" }.CreateConnection().CreateModel();
+
+            channel.QueueDeclare(QueueName, false, false, false, null);
+
+            var consumer = new EventingBasicConsumer(channel);
+            Task.Run(() =>
+            {
+                    consumer.Received += (model, ea) =>
+                    {
+                        var body = ea.Body.ToArray();
+                        var message = Encoding.UTF8.GetString(body);
+                        LogRepository.Instance().AddLog(message);
+                        Console.WriteLine(message);
+                    };
+
+                channel.BasicConsume(QueueName, true, consumer);
+            });
+        }
+
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>

@@ -1,9 +1,7 @@
-﻿
-using Domain;
+﻿using Domain;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using Repository.RepositoriesInterfaces;
-using Repository.ServiceInterfaces;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,9 +12,9 @@ namespace Repository.Services
     {
         private readonly ILogger<RepositoryService> _logger;
         private readonly IUserRepository _userRepository;
-        private ILogSenderService _logSenderService;
+        private LogSenderService _logSenderService;
 
-        public RepositoryUserService(ILogger<RepositoryService> logger, IUserRepository userRepository, ILogSenderService logSenderService)
+        public RepositoryUserService(ILogger<RepositoryService> logger, IUserRepository userRepository, LogSenderService logSenderService)
         {
             _logger = logger;
             _userRepository = userRepository;

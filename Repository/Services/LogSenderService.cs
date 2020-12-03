@@ -1,33 +1,31 @@
 ﻿using RabbitMQ.Client;
-using Repository.ServiceInterfaces;
 using System.Text;
 
 namespace Repository.Services
 {
-    public class LogSenderService : ILogSenderService
+    public class LogSenderService
     {
         private const string _queueName = "logQueue";
-        private IModel _channel;
 
-        public LogSenderService()
+        public void SendMessages(string logToSend)
         {
             var connectionFactory = new ConnectionFactory { HostName = "localhost" };
             IConnection connection = connectionFactory.CreateConnection();
-            _channel = connection.CreateModel();
-            QueueDeclare();
+            IModel channel = connection.CreateModel();
+            QueueDeclare(channel);
+            PublishMessage(logToSend, channel);
         }
-
-        private void QueueDeclare()
+        private void QueueDeclare(IModel channel)
         {
-            _channel.QueueDeclare(queue: _queueName, durable: false, exclusive: false, autoDelete: false, arguments: null);
+            channel.QueueDeclare(queue: _queueName, durable: false, exclusive: false, autoDelete: false, arguments: null);
         }
 
-        public void SendMessages(string message)
+        public void PublishMessage(string message, IModel channel)
         {
             if (!string.IsNullOrEmpty(message))
             {
                 var body = Encoding.UTF8.GetBytes(message);
-                _channel.BasicPublish(exchange: string.Empty, routingKey: _queueName, basicProperties: null, body: body);
+                channel.BasicPublish(exchange: string.Empty, routingKey: _queueName, basicProperties: null, body: body);
             }
         }
     }

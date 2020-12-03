@@ -5,7 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Repository.Repositories;
 using Repository.RepositoriesInterfaces;
-using Repository.ServiceInterfaces;
 using Repository.Services;
 
 namespace Repository
@@ -19,7 +18,7 @@ namespace Repository
             services.AddGrpc();
             services.AddSingleton<ISessionRepository, SessionRepository>();
             services.AddSingleton<IUserRepository, UserRepository>();
-            services.AddSingleton<ILogSenderService, LogSenderService>();
+            services.AddSingleton<LogSenderService, LogSenderService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

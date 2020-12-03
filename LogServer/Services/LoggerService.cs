@@ -1,6 +1,6 @@
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Grpc.Core;
-using LogServer.LoggerRepositoryInterface;
+using LogServer.LoggerRepository;
 using Microsoft.Extensions.Logging;
 
 namespace LogServer
@@ -8,18 +8,16 @@ namespace LogServer
     public class LoggerService : LoggerManager.LoggerManagerBase
     {
         private readonly ILogger<LoggerService> _logger;
-        private readonly ILogRepository _logRepository;
 
-        public LoggerService(ILogger<LoggerService> logger, ILogRepository logRepository)
+        public LoggerService(ILogger<LoggerService> logger)
         {
             _logger = logger;
-            _logRepository = logRepository;
         }
 
         public override Task<LogsResponse> GetLogs(EmptyMessage request, ServerCallContext context)
         {
             var logResponse = new LogsResponse();
-            logResponse.Logs.AddRange(_logRepository.GetLogs());
+            logResponse.Logs.AddRange(LogRepository.Instance().GetLogs());
             return Task.FromResult(logResponse);
         }
     }

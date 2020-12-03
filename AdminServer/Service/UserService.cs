@@ -18,7 +18,7 @@ namespace AdminServer.Service
             var alreadyExist = UserAlreadyExist(user.Email);
             if (alreadyExist)
             {
-                throw new Exception(_userAlreadyExistMessage + user.Email);
+                throw new InvalidOperationException(_userAlreadyExistMessage + user.Email);
             }
             var userRequest = new AddUserRequest
             {

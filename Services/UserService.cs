@@ -9,7 +9,7 @@ namespace Services
 {
     public class UserService
     {
-        private RepoUser.RepoUserClient _clientRepository = new RepoUser.RepoUserClient(GrpcChannel.ForAddress("https://localhost:5001"));
+        private RepoUser.RepoUserClient _clientRepository = new RepoUser.RepoUserClient(GrpcChannel.ForAddress("https://localhost:5003"));
 
         private const string UserAlreadyExistMessage = "Already exist user with that email";
         private const string WrongEmailMessage = "Wrong Email";

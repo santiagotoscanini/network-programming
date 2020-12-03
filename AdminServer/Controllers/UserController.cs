@@ -1,15 +1,19 @@
-﻿
-using AdministratorServer.Models;
-using AdministratorServer.ServicesInterface;
-using Domain;
-using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
+using AdminServer.Models;
+using AdminServer.ServiceInterface;
+using Domain;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
-namespace AdministratorServer.Controllers
+namespace AdminServer.Controllers
 {
+    [Route("api/users")]
     [ApiController]
-    [Route("api/v1/users")]
-    public class UserController : Controller
+    public class UserController : ControllerBase
     {
         private IUserService _userService;
 
@@ -40,10 +44,9 @@ namespace AdministratorServer.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetSomething() 
+        public IActionResult GetSomething()
         {
             return Ok();
         }
-
     }
 }

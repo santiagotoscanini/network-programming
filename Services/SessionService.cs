@@ -10,7 +10,7 @@ namespace Services
     public class SessionService
     {
         private UserService UserService { get; }
-        private Repo.RepoClient _clientRepository = new Repo.RepoClient(GrpcChannel.ForAddress("https://localhost:5001"));
+        private Repo.RepoClient _clientRepository = new Repo.RepoClient(GrpcChannel.ForAddress("https://localhost:5003"));
 
         public SessionService(UserService userService)
         {

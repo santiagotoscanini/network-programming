@@ -4,4 +4,24 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Grpc.AspNetCore" Version="2.23.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Domain\Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="..\LogServer\Protos\logger.proto" GrpcServices="Client">
+      <Link>Protos\logger.proto</Link>
+    </Protobuf>
+    <Protobuf Include="..\Repository\Protos\repo.proto" GrpcServices="Client">
+      <Link>Protos\repo.proto</Link>
+    </Protobuf>
+    <Protobuf Include="..\Repository\Protos\repoUser.proto" GrpcServices="Client">
+      <Link>Protos\repoUser.proto</Link>
+    </Protobuf>
+  </ItemGroup>
+
 </Project>

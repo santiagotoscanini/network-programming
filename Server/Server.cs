@@ -1,6 +1,7 @@
 ﻿using System;
 using static Constants.Constants;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -174,8 +175,8 @@ namespace Server
                                 var userImageEmail = words[2];
                                 var imageName = words[3];
                                 var userEmail = words[4];
-                                var comment = words[5];
-                                return await CreateImageCommentAsync(comment, imageName, userImageEmail, userEmail);
+                                var comment = words.Skip(5).ToList();
+                                return await CreateImageCommentAsync(string.Join(" ", comment), imageName, userImageEmail, userEmail);
                         }
 
                         break;

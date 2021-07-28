@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option csharp_namespace = "LogServer";
+
+package logger;
+
+service LoggerManager {
+  rpc GetLogs (PaginationRequest) returns (LogsResponse);
+}
+
+message LogsResponse {
+  repeated string logs = 1;
+}
+
+message PaginationRequest{
+	int32 page = 1;
+	int32 pageSize = 2;
+}

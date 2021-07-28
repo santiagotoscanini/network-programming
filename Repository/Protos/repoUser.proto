@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+option csharp_namespace = "Repository";
+
+package repository;
+
+service RepoUser {
+  rpc AddUser(AddUserRequest) returns (EmptyMessagee);
+  rpc GetUsers(EmptyMessagee) returns (GetUsersResponse);
+  rpc DeleteUser(AddUserRequest) returns (EmptyMessagee);
+  rpc UpdateUserPassword(AddUserRequest) returns(EmptyMessagee);
+  rpc AddUserImage(AddUserImageRequest) returns (EmptyMessagee);
+  rpc GetUserImages(AddUserRequest) returns (GetUserImagesResponse);
+  rpc AddImageComment(AddImageCommentRequest) returns (EmptyMessagee);
+  rpc GetImageComments(AddUserImageRequest) returns (GetImageCommentsResponse);
+}
+
+message AddUserRequest {
+	string userEmail = 1;
+	string password = 2;
+}
+
+message EmptyMessagee {}
+
+message GetUsersResponse {
+	repeated UserProto users = 1;
+}
+
+message UserProto {
+	string userEmail = 1;
+	string password = 2;
+	repeated ImageProto images = 3;
+}
+
+message ImageProto {
+	string name = 1;
+	repeated CommentProto comments = 2;
+}
+
+message CommentProto {
+	string text = 1;
+	string userEmail = 2;
+}
+
+message AddUserImageRequest {
+	string email = 1;
+	string imageName = 2;
+}
+
+message GetUserImagesResponse {
+	repeated ImageProto images = 1;
+}
+
+message AddImageCommentRequest {
+    string userEmail = 2; 
+	string imageName = 1;
+	CommentProto comment = 3; 
+}
+
+message GetImageCommentsResponse{
+	repeated CommentProto comments = 1;
+}

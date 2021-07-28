@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Grpc.Tools" Version="2.27.0">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Repository\Repository.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Protobuf Include="..\Repository\Protos\repo.proto" GrpcServices="Client">
+        <Link>Protos\repo.proto</Link>
+      </Protobuf>
+      <Protobuf Include="..\Repository\Protos\repoUser.proto" GrpcServices="Client">
+        <Link>Protos\repoUser.proto</Link>
+      </Protobuf>
+    </ItemGroup>
+</Project>
